@@ -24,30 +24,28 @@ struct NominalItemBank{CategoryStorageT <: PerCategoryFloat} <: AbstractItemBank
     ranks::CategoryStorageT # ak_1 ... ak_k
     discriminations::Matrix{Float64} # a_1 ... a_n
     cut_points::CategoryStorageT # d_1 ... d_k
-    labels::MaybeLabels
 end
 
-function NominalItemBank(ranks::Matrix{Float64}, discriminations::Matrix{Float64}, cut_points::Matrix{Float64}, labels=nothing)
-    NominalItemBank(nestedview(ranks), discriminations, nestedview(cut_points), labels)
+function NominalItemBank(ranks::Matrix{Float64}, discriminations::Matrix{Float64}, cut_points::Matrix{Float64})
+    NominalItemBank(nestedview(ranks), discriminations, nestedview(cut_points))
 end
 
-function NominalItemBank(ranks, discriminations::Vector{Float64}, cut_points, labels=nothing)
-    NominalItemBank(ranks, reshape(discriminations, 1, :), cut_points, labels)
+function NominalItemBank(ranks, discriminations::Vector{Float64}, cut_points)
+    NominalItemBank(ranks, reshape(discriminations, 1, :), cut_points)
 end
 
-function GPCMItemBank(discriminations, cut_points::PerCategoryFloat, labels=nothing)
+function GPCMItemBank(discriminations, cut_points::PerCategoryFloat)
     NominalItemBank(
         # XXX: Could probably be more efficient by making this lazy somehow
         [1:length(item_cut_points) for item_cut_points in cut_points],
         discriminations,
-        cut_points,
-        labels
+        cut_points
     )
 end
 
-function GPCMItemBank(discriminations, cut_points::Matrix{Float64}, labels=nothing)
-    GPCMItemBank(discriminations, nextedview(cut_points), labels)
+function GPCMItemBank(discriminations, cut_points::Matrix{Float64})
+    GPCMItemBank(discriminations, nextedview(cut_points))
 end
 
-MathTraits.DomainType(::NominalItemBank) = OneDimContinuousDomain()
-Responses.ResponseType(::NominalItemBank) = MultinomialResponse()
+DomainType(::NominalItemBank) = OneDimContinuousDomain()
+ResponseType(::NominalItemBank) = MultinomialResponse()

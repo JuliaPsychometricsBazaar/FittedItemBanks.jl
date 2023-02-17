@@ -6,7 +6,7 @@ from fitting an Item-Response Theory (IRT) model.
 module FittedItemBanks
 
 export AbstractItemBank, GuessItemBank
-export SlipItemBank, TransferItemBank,
+export SlipItemBank, TransferItemBank
 export ItemBank2PL, ItemBank3PL, ItemBank4PL
 export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
 
@@ -14,6 +14,7 @@ using Distributions
 using Random: AbstractRNG
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
+using ArraysOfArrays: VectorOfArrays
 
 abstract type AbstractItemBank end
 

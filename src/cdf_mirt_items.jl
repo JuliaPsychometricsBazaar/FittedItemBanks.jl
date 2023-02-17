@@ -11,13 +11,11 @@ struct CdfMirtItemBank{DistT <: ContinuousUnivariateDistribution} <: AbstractIte
     distribution::DistT
     difficulties::Vector{Float64}
     discriminations::Matrix{Float64}
-    labels::MaybeLabels
 
     function CdfMirtItemBank(
         distribution::DistT,
         difficulties::Vector{Float64},
         discriminations::Matrix{Float64},
-        labels::MaybeLabels
     ) where {DistT <: ContinuousUnivariateDistribution}
         if size(discriminations, 2) != length(difficulties)
             error(
@@ -25,10 +23,7 @@ struct CdfMirtItemBank{DistT <: ContinuousUnivariateDistribution} <: AbstractIte
                 "should match number of item in 2nd dimension of discriminations"
             )
         end
-        if labels !== nothing && length(difficulties) !== length(labels)
-            error("Labels must have same number of items as difficulties")
-        end
-        new{typeof(distribution)}(distribution, difficulties, discriminations, labels)
+        new{typeof(distribution)}(distribution, difficulties, discriminations)
     end
 end
 
