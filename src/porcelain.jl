@@ -14,10 +14,9 @@ logistic single-dimensional IRT model.
 """
 function ItemBank2PL(
     difficulties,
-    discriminations;
-    labels=nothing
+    discriminations
 )
-    TransferItemBank(NormalScaledLogistic(), difficulties, discriminations, labels)
+    TransferItemBank(NormalScaledLogistic(), difficulties, discriminations)
 end
 
 """
@@ -27,10 +26,9 @@ logistic single-dimensional IRT model.
 function ItemBank3PL(
     difficulties,
     discriminations,
-    guesses;
-    labels=nothing
+    guesses
 )
-    GuessItemBank(guesses, ItemBank2PL(difficulties, discriminations; labels=labels))
+    GuessItemBank(guesses, ItemBank2PL(difficulties, discriminations))
 end
 
 """
@@ -41,10 +39,9 @@ function ItemBank4PL(
     difficulties,
     discriminations,
     guesses,
-    slips;
-    labels=nothing
+    slips
 )
-    SlipItemBank(slips, ItemBank3PL(difficulties, discriminations, guesses; labels=labels))
+    SlipItemBank(slips, ItemBank3PL(difficulties, discriminations, guesses))
 end
 
 """
@@ -53,10 +50,9 @@ logistic MIRT model.
 """
 function ItemBankMirt2PL(
     difficulties,
-    discriminations;
-    labels=nothing
+    discriminations
 )
-    CdfMirtItemBank(NormalScaledLogistic(), difficulties, discriminations, labels)
+    CdfMirtItemBank(NormalScaledLogistic(), difficulties, discriminations)
 end
 
 """
@@ -66,10 +62,9 @@ logistic MIRT model.
 function ItemBankMirt3PL(
     difficulties,
     discriminations,
-    guesses;
-    labels=nothing
+    guesses
 )
-    GuessItemBank(guesses, ItemBankMirt2PL(difficulties, discriminations; labels=labels))
+    GuessItemBank(guesses, ItemBankMirt2PL(difficulties, discriminations))
 end
 
 """
@@ -80,37 +75,33 @@ function ItemBankMirt4PL(
     difficulties,
     discriminations,
     guesses,
-    slips;
-    labels=nothing
+    slips
 )
-    SlipItemBank(slips, ItemBankMirt3PL(difficulties, discriminations, guesses; labels=labels))
+    SlipItemBank(slips, ItemBankMirt3PL(difficulties, discriminations, guesses))
 end
 
 function ItemBankGPCM2PL(
     discriminations,
-    cut_points;
-    labels=nothing
+    cut_points
 )
-    GPCMItemBank(discriminations, cut_points, labels)
+    GPCMItemBank(discriminations, cut_points)
 end
 
 function ItemBankGPCM3PL(
     discriminations,
     cut_points,
-    guesses;
-    labels=nothing
+    guesses
 )
-    GuessItemBank(guesses, ItemBankGPCM2PL(discriminations, cut_points; labels=labels))
+    GuessItemBank(guesses, ItemBankGPCM2PL(discriminations, cut_points))
 end
 
 function ItemBankGPCM4PL(
     discriminations,
     cut_points,
     guesses,
-    slips;
-    labels=nothing
+    slips
 )
-    SlipItemBank(slips, ItemBankGPCM3PL(discriminations, cut_points, guesses; labels=labels))
+    SlipItemBank(slips, ItemBankGPCM3PL(discriminations, cut_points, guesses))
 end
 
 abstract type StdModelForm end

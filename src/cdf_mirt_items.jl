@@ -29,3 +29,32 @@ end
 
 DomainType(::CdfMirtItemBank) = VectorContinuousDomain()
 ResponseType(::CdfMirtItemBank) = BooleanResponse()
+
+function _mirt_norm_abil(θ, difficulty, discrimination)
+    dot((θ .- difficulty), discrimination)
+end
+
+function norm_abil(ir::ItemResponse{<:CdfMirtItemBank}, θ)
+    _mirt_norm_abil(θ, ir.item_bank.difficulties[ir.index], @view ir.item_bank.discriminations[:, ir.index])
+end
+
+function resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
+    resp1 = resp(ir, θ)
+    SVector(1.0 - resp1, resp1)
+end
+
+function resp(ir::ItemResponse{<:CdfMirtItemBank}, outcome::Bool, θ)
+    if outcome
+        resp(ir, θ)
+    else
+        cresp(ir, θ)
+    end
+end
+
+function resp(ir::ItemResponse{<:CdfMirtItemBank}, θ)
+    cdf(ir.item_bank.distribution, norm_abil(ir, θ))
+end
+
+function cresp(ir::ItemResponse{<:CdfMirtItemBank}, θ)
+    ccdf(ir.item_bank.distribution, norm_abil(ir, θ))
+end

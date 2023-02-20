@@ -49,3 +49,40 @@ end
 
 DomainType(::NominalItemBank) = OneDimContinuousDomain()
 ResponseType(::NominalItemBank) = MultinomialResponse()
+
+function Base.length(item_bank::NominalItemBank)
+    length(item_bank.difficulties)
+end
+
+function linears(ir::ItemResponse{<:NominalItemBank}, θ)
+    aks = @view ir.item_bank.ranks[ir.index]
+    as = @view ir.item_bank.discriminations[:, ir.index]
+    ds = @view ir.item_bank.cut_points[ir.index]
+    aks .* (dot(as, θ) .+ ds)
+end
+
+function (ir::ItemResponse{<:NominalItemBank})(θ)
+    resp(ir, θ)
+end
+
+function num_response_categories(ir::ItemResponse{<:NominalItemBank})
+    length(ir.item_bank.cut_points[ir.index])
+end
+
+function resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
+    ir(θ)
+end
+
+function resp(ir::ItemResponse{<:NominalItemBank}, θ)
+    outs .= exp.(linears(ir, θ))
+    outs ./ sum(outs)
+end
+
+function logresp(ir::ItemResponse{<:NominalItemBank}, θ)
+    outs .= linears(ir, θ)
+    outs .= outs - logsumexp(linears(ir, θ))
+end
+
+function item_params(item_bank::NominalItemBank, idx)
+    (; difficulty=item_bank.difficulties[idx], discrimination=item_bank.discriminations[idx])
+end

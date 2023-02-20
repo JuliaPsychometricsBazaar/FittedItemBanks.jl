@@ -61,3 +61,61 @@ end
 function GuessItemBank(guesses::Vector{Float64}, inner_bank::AnySlipItemBank)
     @set inner_bank.inner_bank = GuessItemBank(guess, inner_bank.inner_bank)
 end
+
+irf_size(guess, slip) = 1.0 - guess - slip
+
+@inline function transform_irf_y(guess::Float64, slip::Float64, y)
+    guess + irf_size(guess, slip) * y
+end
+
+@inline function transform_irf_y(ir::ItemResponse{<:GuessItemBank}, response, y)
+    guess = y_offset(ir.item_bank, ir.index)
+    if response
+        transform_irf_y(guess, 0.0, y)
+    else
+        transform_irf_y(0.0, guess, y)
+    end
+end
+
+@inline function transform_irf_y(ir::ItemResponse{<:SlipItemBank}, response, y)
+    slip = y_offset(ir.item_bank, ir.index)
+    if response
+        transform_irf_y(0.0, slip, y)
+    else
+        transform_irf_y(slip, 0.0, y)
+    end
+end
+
+function (ir::ItemResponse{<:AnySlipOrGuessItemBank})(θ)
+    resp(ir, θ)
+end
+
+function resp(ir::ItemResponse{<:AnySlipOrGuessItemBank}, θ)
+    resp(ir, true, θ)
+end
+
+function resp(ir::ItemResponse{<:AnySlipOrGuessItemBank}, response, θ)
+    transform_irf_y(ir, response, resp(inner_item_response(ir), response, θ))
+end
+
+function resp_vec(ir::ItemResponse{<:AnySlipOrGuessItemBank}, θ)
+    r = resp_vec(inner_item_response(ir), θ)
+    SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
+end
+
+# XXX: Not getting dispatched to
+function (ir::ItemResponse{<:AnySlipAndGuessItemBank})(θ)
+    transform_irf_y(
+        y_offset(ir.item_bank.inner_bank, ir.index),
+        y_offset(ir.item_bank, ir.index),
+        ItemResponse(ir.item_bank.inner_bank.inner_bank, ir.index)(θ)
+    )
+end
+
+function resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, response, θ)
+    transform_irf_y(
+        y_offset(ir.item_bank.inner_bank, ir.index),
+        y_offset(ir.item_bank, ir.index),
+        resp(ItemResponse(ir.item_bank.inner_bank, ir.index), response, θ)
+    )
+end
