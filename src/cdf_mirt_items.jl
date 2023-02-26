@@ -30,6 +30,14 @@ end
 DomainType(::CdfMirtItemBank) = VectorContinuousDomain()
 ResponseType(::CdfMirtItemBank) = BooleanResponse()
 
+function Base.length(item_bank::CdfMirtItemBank)
+    length(item_bank.difficulties)
+end
+
+function domdims(item_bank::CdfMirtItemBank)
+    size(item_bank.discriminations, 1)
+end
+
 function _mirt_norm_abil(θ, difficulty, discrimination)
     dot((θ .- difficulty), discrimination)
 end

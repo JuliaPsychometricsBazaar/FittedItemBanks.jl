@@ -18,7 +18,6 @@ struct FixedSlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
 end
 y_offset(item_bank::FixedSlipItemBank, item_idx) = item_bank.slip
 @forward FixedSlipItemBank.inner_bank Base.length
-@forward FixedSlipItemBank.inner_bank Base.ndims
 function item_params(item_bank::FixedSlipItemBank, idx)
     (;item_params(item_bank.inner_bank, idx)..., slip=item_bank.slip)
 end
@@ -52,6 +51,7 @@ const AnySlipAndGuessItemBank = Union{SlipItemBank{AnyGuessItemBank}, FixedSlipI
 
 DomainType(item_bank::AnySlipOrGuessItemBank) = DomainType(item_bank.inner_bank)
 ResponseType(item_bank::AnySlipOrGuessItemBank) = ResponseType(item_bank.inner_bank)
+inner_item_response(ir::ItemResponse{<: AnySlipOrGuessItemBank}) = ItemResponse(ir.item_bank.inner_bank, ir.index)
 
 # Ensure we always have Slip{Guess{ItemBank}}
 function FixedGuessItemBank(guess::Float64, inner_bank::AnySlipItemBank)
@@ -100,6 +100,20 @@ end
 
 function resp_vec(ir::ItemResponse{<:AnySlipOrGuessItemBank}, θ)
     r = resp_vec(inner_item_response(ir), θ)
+    SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
+end
+
+function item_domain(ir::ItemResponse{<:AnySlipOrGuessItemBank}, left_mass, right_mass)
+    item_domain(inner_item_response(ir), left_mass, right_mass)
+end
+
+function maxabilresp(ir::ItemResponse{<:AnySlipOrGuessItemBank})
+    r = maxabilresp(inner_item_response(ir))
+    SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
+end
+
+function minabilresp(ir::ItemResponse{<:AnySlipOrGuessItemBank})
+    r = minabilresp(inner_item_response(ir))
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
 

@@ -10,34 +10,25 @@ export SlipItemBank, TransferItemBank
 export ItemBank2PL, ItemBank3PL, ItemBank4PL
 export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
 
+export Smoother, KernelSmoother, DichotomousSmoothedItemBank, DichotomousPointsItemBank
+export ItemResponse, resp, resp_vec
+
+export DomainType, DiscreteDomain, ContinuousDomain, VectorContinuousDomain
+export OneDimContinuousDomain, DiscreteIndexableDomain, DiscreteIterableDomain
+
 using Distributions
 using Random: AbstractRNG
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
 using ArraysOfArrays: VectorOfArrays
-using PsychometricsBazzarBase.Integrators
+using StaticArrays: SVector
+using PsychometricsBazzarBase.ExtraDistributions: NormalScaledLogistic
 
 abstract type AbstractItemBank end
 
 function Base.eachindex(item_bank::AbstractItemBank)
     Base.OneTo(length(item_bank))
 end
-
-# This seems to be the most commonly found exact value in the wild, see e.g. the
-# R package `mirt``
-const scaling_factor = 1.702
-
-struct NormalScaledLogistic
-    inner::Logistic
-    NormalScaledLogistic(μ, σ) = Logistic(μ / scaling_factor, σ / scaling_factor)
-end
-
-NormalScaledLogistic() = NormalScaledLogistic(0.0, 1.0)
-
-@forward NormalScaledLogistic.inner (
-    sampler, pdf, logpdf, cdf, quantile, minimum, maximum, insupport, mean, var,
-    modes, mode, skewness, kurtosis, entropy, mgf, cf
-)
 
 rand(rng::AbstractRNG, d::NormalScaledLogistic) = rand(rng, d.inner)
 
@@ -58,30 +49,27 @@ struct ItemResponse{ItemBankT <: AbstractItemBank}
 end
 
 """
-Binary search for the point x where the integral from -inf...x is target += precis
+Binary search for the point x where f(x) = target += precis given f is assumed as monotonically increasing.
 """
 function _search(
-    integrator::Integrator,
-    ir::F,
+    f::F,
     lim_lower,
     lim_upper,
     target,
     precis;
     max_iters=50,
-    denom=normdenom(integrator)
 ) where {F}
     lower = lim_lower
     upper = lim_upper
-    @info "max_iters" max_iters
+    @info "max_iters" max_iters target precis
     for _ in 1:max_iters
         pivot = lower + (upper - lower) / 2
-        @info "limits" lo=lim_lower hi=pivot
-        mass = intval(integrator(ir; lo=lim_lower, hi=pivot))
-        ratio = mass / denom
-        @info "mass" mass denom ratio target precis
-        if target - precis <= ratio <= target
+        @info "limits" lower upper pivot
+        y = f(pivot)
+        @info "pivot" pivot y
+        if target - precis <= y <= target + precis
             return pivot
-        elseif ratio < target
+        elseif y < target
             lower = pivot
         else
             upper = pivot
@@ -90,44 +78,64 @@ function _search(
     error("Could not find point after $max_iters iterations")
 end
 
+function search_per_dim(::VectorContinuousDomain, ir, lo, hi, start, target, thresh)
+    buf = copy(start)
+    bests = Array{Float64}(undef, size(lo))
+    for idx in eachindex(lo)
+        function partial_deriv(θ)
+            buf[idx] = θ
+            max(abs.(resp_vec(ir, buf) .- target))
+        end
+        bests[idx] = _search(partial_deriv, lo[idx], hi[idx], 0, thresh)
+        buf[idx] = start[idx]
+    end
+    bests
+end
+
+function search_per_dim(::OneDimContinuousDomain, ir, lo, hi, start, target, thresh)
+    function partial_deriv(θ)
+        maximum(abs.(resp_vec(ir, θ) .- target))
+    end
+    _search(partial_deriv, lo, hi, 0, thresh)
+end
+
 """
 Given an item bank, this function returns the domain of the item bank, i.e. the
 range (lo, hi) which includes for each item the range in which the the item
 response function is changing.
 """
 function item_bank_domain(
-    integrator::Integrator,
     item_bank::AbstractItemBank;
-    tol=1e-3,
-    precis=1e-2,
-    zero_symmetric=false
+    zero_symmetric=false,
+    items=eachindex(item_bank),
+    thresh=nothing
 )
-    tol1 = tol / 2.0
-    eff_precis = tol1 * precis
     if length(item_bank) == 0
-        (integrator.lo, integrator.hi)
+        (NaN, NaN)
     end
-    lo = integrator.hi
-    hi = integrator.lo
-    for item_idx in item_idxs(item_bank)
+    cur_lo = Inf
+    cur_hi = -Inf
+    for item_idx in items
         ir = ItemResponse(item_bank, item_idx)
-        # XXX: denom should be the denom of the item response
-        denom = normdenom(integrator)
-        inv_ir(x) = 1.0 - ir(-x)
-        if intval(integrator(ir; lo=integrator.lo, hi=lo)) > tol1
-            lo = _search(integrator, ir, integrator.lo, lo, tol1, eff_precis; denom=denom)
+        if thresh === nothing
+            item_lo, item_hi = item_domain(ir)
+        else
+            item_lo, item_hi = item_domain(ir, thresh)
         end
-        inv_denom = integrator.hi - integrator.lo - denom
-        # XXX
-        if intval(integrator(inv_ir; lo=-integrator.hi, hi=hi)) > tol1
-            hi = -_search(integrator, inv_ir, -integrator.hi, -hi, tol1, eff_precis; denom=inv_denom)
+        if item_lo < cur_lo
+            cur_lo = item_lo
         end
+        if item_hi > cur_hi
+            cur_hi = item_hi
+        end
+        #cur_lo = search_per_dim(DomainType(item_bank), ir, lo, cur_lo, cur_lo, minabilresp(ir), thresh)
+        #cur_hi = search_per_dim(DomainType(item_bank), ir, cur_hi, hi, cur_hi, maxabilresp(ir), thresh)
     end
     if zero_symmetric
-        dist = max(abs(lo), abs(hi))
+        dist = max(abs(cur_lo), abs(cur_hi))
         (-dist, dist)
     else
-        (lo, hi)
+        (cur_lo, cur_hi)
     end
 end
 

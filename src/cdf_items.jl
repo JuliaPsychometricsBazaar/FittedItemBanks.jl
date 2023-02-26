@@ -7,18 +7,57 @@ end
 DomainType(::TransferItemBank) = OneDimContinuousDomain()
 ResponseType(::TransferItemBank) = BooleanResponse()
 
+function Base.length(item_bank::TransferItemBank)
+    length(item_bank.difficulties)
+end
+
 function _norm_abil_1d(θ, difficulty, discrimination)
     (θ - difficulty) * discrimination
+end
+
+function _unnorm_abil_1d(θ, difficulty, discrimination)
+    θ / discrimination + difficulty
 end
 
 function norm_abil(ir::ItemResponse{<:TransferItemBank}, θ)
     _norm_abil_1d(θ, ir.item_bank.difficulties[ir.index], ir.item_bank.discriminations[ir.index])
 end
 
+function unnorm_abil(ir::ItemResponse{<:TransferItemBank}, θ)
+    _unnorm_abil_1d(θ, ir.item_bank.difficulties[ir.index], ir.item_bank.discriminations[ir.index])
+end
+
 function resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
     resp1 = resp(ir, θ)
     SVector(1.0 - resp1, resp1)
 end
+
+#=
+function density_vec(ir::ItemResponse{<:TransferItemBank}, θ)
+    density1 = density(ir, θ)
+    SVector(-density1, density1)
+end
+=#
+
+function item_domain(ir::ItemResponse, mass=1e-3)
+    item_domain(ir, mass, mass)
+end
+
+function item_domain(ir::ItemResponse{<:TransferItemBank}, left_mass, right_mass)
+    (
+        unnorm_abil(ir, quantile(ir.item_bank.distribution, left_mass)),
+        unnorm_abil(ir, quantile(ir.item_bank.distribution, 1.0 - right_mass))
+    )
+end
+
+function maxabilresp(::ItemResponse{<:TransferItemBank})
+    return SVector(0.0, 1.0)
+end
+
+function minabilresp(::ItemResponse{<:TransferItemBank})
+    return SVector(1.0, 0.0)
+end
+
 function resp(ir::ItemResponse{<:TransferItemBank}, outcome::Bool, θ)
     if outcome
         resp(ir, θ)
@@ -29,6 +68,10 @@ end
 
 function resp(ir::ItemResponse{<:TransferItemBank}, θ)
     cdf(ir.item_bank.distribution, norm_abil(ir, θ))
+end
+
+function density(ir::ItemResponse{<:TransferItemBank}, θ)
+    pdf(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 function cresp(ir::ItemResponse{<:TransferItemBank}, θ)
