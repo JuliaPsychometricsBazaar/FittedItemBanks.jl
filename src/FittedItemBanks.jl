@@ -61,12 +61,9 @@ function _search(
 ) where {F}
     lower = lim_lower
     upper = lim_upper
-    @info "max_iters" max_iters target precis
     for _ in 1:max_iters
         pivot = lower + (upper - lower) / 2
-        @info "limits" lower upper pivot
         y = f(pivot)
-        @info "pivot" pivot y
         if target - precis <= y <= target + precis
             return pivot
         elseif y < target
