@@ -7,9 +7,14 @@ from fitting an Item-Response Theory (IRT) model.
 CurrentModule = FittedItemBanks
 ```
 
-```@index
+## Contents
+
+```@contents
+Pages = ["interface.md", "parametric.md", "non_parametric.md"]
+Depth = 1
 ```
 
-```@autodocs
-Modules = [FittedItemBanks]
+## Index
+
+```@index
 ```

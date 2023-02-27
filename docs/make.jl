@@ -13,7 +13,8 @@ makedocs(;
     sitename="FittedItemBanks.jl",
     format=format,
     pages=[
-        "Getting started" => "index.md",
+        "Home" => "index.md",
+        "Reference" => ["interface.md", "parametric.md", "non_parametric.md"]
     ],
 )
 

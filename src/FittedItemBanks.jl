@@ -17,12 +17,12 @@ export DomainType, DiscreteDomain, ContinuousDomain, VectorContinuousDomain
 export OneDimContinuousDomain, DiscreteIndexableDomain, DiscreteIterableDomain
 
 using Distributions
-using Random: AbstractRNG
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
 using ArraysOfArrays: VectorOfArrays
 using StaticArrays: SVector
 using PsychometricsBazzarBase.ExtraDistributions: NormalScaledLogistic
+using DocStringExtensions
 
 abstract type AbstractItemBank end
 
@@ -30,19 +30,86 @@ function Base.eachindex(item_bank::AbstractItemBank)
     Base.OneTo(length(item_bank))
 end
 
-rand(rng::AbstractRNG, d::NormalScaledLogistic) = rand(rng, d.inner)
+"""
+$(TYPEDEF)
 
+Domain type for a item banks' item response function.
+"""
 abstract type DomainType end
+
+"""
+$(TYPEDEF)
+
+A discrete domain. Typically this is a sampled version of a continuous domain
+item bank.
+
+Item response functions with discrete domains tend to support less operations
+than those with continuous domains.
+"""
 abstract type DiscreteDomain <: DomainType end
+
+"""
+$(TYPEDEF)
+
+A continuous domain.
+"""
 abstract type ContinuousDomain <: DomainType end
+
+"""
+$(TYPEDEF)
+
+A continuous domain that is vector valued.
+"""
 struct VectorContinuousDomain <: ContinuousDomain end
+
+"""
+$(TYPEDEF)
+
+A continuous domain that is scalar valued.
+"""
 struct OneDimContinuousDomain <: ContinuousDomain end
+
+"""
+$(TYPEDEF)
+
+An discrete domain which is efficiently indexable and iterable.
+"""
 struct DiscreteIndexableDomain <: DiscreteDomain end
+
+"""
+$(TYPEDEF)
+
+An discrete domain which is only efficiently iterable.
+"""
 struct DiscreteIterableDomain <: DiscreteDomain end
 
+"""
+$(TYPEDEF)
+
+A response type for an item bank.
+"""
 abstract type ResponseType end
+
+"""
+$(TYPEDEF)
+
+A boolean/dichotomous response.
+"""
 struct BooleanResponse <: ResponseType end
+
+"""
+$(TYPEDEF)
+
+A multinomial response, including ordinal responses.
+"""
 struct MultinomialResponse <: ResponseType end
+
+"""
+$(TYPEDEF)
+$(TYPEDFIELDS)
+
+An item response.
+"""
 struct ItemResponse{ItemBankT <: AbstractItemBank}
     item_bank::ItemBankT
     index::Int
