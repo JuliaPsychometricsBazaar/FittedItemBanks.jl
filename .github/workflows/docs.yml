@@ -19,23 +19,19 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: 'nightly'
-      - name: Set CAT packages to develop & resolve env
+      - name: Setup dependencies
         run: |
           julia --project=docs/ -e 'using Pkg;
+                                    Pkg.develop([
+                                      PackageSpec(url="https://github.com/JuliaPsychometricsBazzar/PsychometricsBazzarBase.jl.git"),
+                                      PackageSpec(url="https://github.com/JuliaPsychometricsBazzar/FittedItemBanks.jl.git"),
+                                      PackageSpec(path=pwd())
+                                    ]);
+                                    Pkg.add(Pkg.PackageSpec(name="GitHubActions", version="0.1"));
                                     Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@v1
         with:
           project: 'docs'
-      - name: Install GitHubActions.jl in docs env
-        run: |
-          julia --project=docs/ -e '
-            using Pkg;
-            Pkg.add(Pkg.PackageSpec(name="GitHubActions", version="0.1"))'
-      - name: Install dependencies
-        run: julia --project=docs/ -e '
-            using Pkg;
-            Pkg.develop(PackageSpec(path=pwd()));
-            Pkg.instantiate()'
       - name: Make docs
         run: |
           julia --project=docs/ -e '
