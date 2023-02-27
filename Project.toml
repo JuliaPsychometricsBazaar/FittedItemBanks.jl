@@ -15,6 +15,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 Distributions = "0.25"
+DocStringExtensions = "0.9"
 PsychometricsBazzarBase = "0.1.0"
 Setfield = "0.8, 1"
 StaticArrays = "1"
