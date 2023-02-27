@@ -70,5 +70,3 @@ function resp(ir::ItemResponse{<:DichotomousSmoothedItemBank{<:NearestNeighborSm
     end
     ir.inner_bank.inner_bank.ys[ir.index, neighbor_idx]
 end
-
-end
