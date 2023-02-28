@@ -28,9 +28,6 @@ jobs:
                                     ]);
                                     Pkg.add(Pkg.PackageSpec(name="GitHubActions", version="0.1"));
                                     Pkg.instantiate()'
-      - uses: julia-actions/julia-buildpkg@v1
-        with:
-          project: 'docs'
       - name: Make docs
         run: |
           julia --project=docs/ -e '
