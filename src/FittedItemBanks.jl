@@ -210,5 +210,6 @@ include("./cdf_mirt_items.jl")
 include("./sampled_items.jl")
 include("./nominal_items.jl")
 include("./porcelain.jl")
+include("./DummyData.jl")
 
 end
