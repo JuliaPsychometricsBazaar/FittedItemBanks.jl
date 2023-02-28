@@ -1,0 +1,4 @@
+[deps]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+FittedItemBanks = "3f797b09-34e4-41d7-acf6-3302ae3248a5"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
