@@ -2,7 +2,7 @@
 
 julia_version = "1.10.0-DEV"
 manifest_format = "2.0"
-project_hash = "af74a97299455d593e4e356ee4a3e885fc7ba59a"
+project_hash = "60f2b95622853a31302914d1f7c8659b8239e41a"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
@@ -468,9 +468,9 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[deps.PsychometricsBazzarBase]]
 deps = ["Cuba", "Cubature", "Distributions", "DocStringExtensions", "FillArrays", "HCubature", "Interpolations", "Lazy", "LinearAlgebra", "MacroTools", "Measurements", "MonteCarloIntegration", "NLSolversBase", "Optim", "OrderedCollections", "QuadGK", "UnPack"]
-path = "../PsychometricsBazzarBase.jl"
+git-tree-sha1 = "2a5e87ac04620c01ca9f328dcd7923c017a217d3"
 uuid = "8a5e4057-03e0-4a42-ba57-0eb88ce604f5"
-version = "0.1.0"
+version = "0.2.0"
 
 [[deps.QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
