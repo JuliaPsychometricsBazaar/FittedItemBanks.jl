@@ -11,17 +11,22 @@ export ItemBank2PL, ItemBank3PL, ItemBank4PL
 export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
 
 export Smoother, KernelSmoother, DichotomousSmoothedItemBank, DichotomousPointsItemBank
-export ItemResponse, resp, resp_vec
+
+export domdims, ItemResponse, resp, resp_vec
 
 export DomainType, DiscreteDomain, ContinuousDomain, VectorContinuousDomain
 export OneDimContinuousDomain, DiscreteIndexableDomain, DiscreteIterableDomain
+
+export ResponseType, BooleanResponse, MultinomialResponse
+
+export SimpleItemBankSpec, StdModel2PL, StdModel3PL, StdModel4PL
 
 using Distributions
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
 using ArraysOfArrays: VectorOfArrays
 using StaticArrays: SVector
-using PsychometricsBazzarBase.ExtraDistributions: NormalScaledLogistic
+using PsychometricsBazzarBase.ConstDistributions: normal_scaled_logistic
 using DocStringExtensions
 
 abstract type AbstractItemBank end

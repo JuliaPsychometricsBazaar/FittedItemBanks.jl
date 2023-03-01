@@ -2,9 +2,13 @@ module DummyData
 
 using Distributions: Normal, MvNormal, Zeros, ScalMat
 using Random
+using ArraysOfArrays: VectorOfArrays
 
 import ..SimpleItemBankSpec, ..StdModelForm, ..StdModel2PL, ..StdModel3PL, ..StdModel4PL
 import ..OneDimContinuousDomain, ..VectorContinuousDomain, ..BooleanResponse, ..MultinomialResponse, ..ItemBank
+import ..GuessItemBank, ..SlipItemBank
+
+export dummy_item_bank, dummy_full
 
 const default_num_questions = 8000
 const default_num_testees = 30
@@ -22,7 +26,7 @@ dummy_guesses(rng, num_questions) = clamp_rand(rng, Normal(0.0, 0.2), num_questi
 dummy_slips(rng, num_questions) = clamp_rand(rng, Normal(0.0, 0.2), num_questions)
 
 function dummy_cut_points(rng, num_questions)
-    cut_points_ragged = ArrayOfVectors()
+    cut_points_ragged = VectorOfArrays{Float64, 1}()
     for _ in 1:num_questions
         cuts = rand(rng, 1:5)
         push!(cut_points_ragged, rand(rng, std_normal, cuts))

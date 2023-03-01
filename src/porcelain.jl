@@ -16,7 +16,7 @@ function ItemBank2PL(
     difficulties,
     discriminations
 )
-    TransferItemBank(NormalScaledLogistic(), difficulties, discriminations)
+    TransferItemBank(normal_scaled_logistic, difficulties, discriminations)
 end
 
 """
@@ -52,7 +52,7 @@ function ItemBankMirt2PL(
     difficulties,
     discriminations
 )
-    CdfMirtItemBank(NormalScaledLogistic(), difficulties, discriminations)
+    CdfMirtItemBank(normal_scaled_logistic, difficulties, discriminations)
 end
 
 """
@@ -80,28 +80,11 @@ function ItemBankMirt4PL(
     SlipItemBank(slips, ItemBankMirt3PL(difficulties, discriminations, guesses))
 end
 
-function ItemBankGPCM2PL(
+function ItemBankGPCM(
     discriminations,
     cut_points
 )
     GPCMItemBank(discriminations, cut_points)
-end
-
-function ItemBankGPCM3PL(
-    discriminations,
-    cut_points,
-    guesses
-)
-    GuessItemBank(guesses, ItemBankGPCM2PL(discriminations, cut_points))
-end
-
-function ItemBankGPCM4PL(
-    discriminations,
-    cut_points,
-    guesses,
-    slips
-)
-    SlipItemBank(slips, ItemBankGPCM3PL(discriminations, cut_points, guesses))
 end
 
 abstract type StdModelForm end
@@ -121,9 +104,7 @@ constructor(::SimpleItemBankSpec{StdModel4PL, OneDimContinuousDomain, BooleanRes
 constructor(::SimpleItemBankSpec{StdModel2PL, VectorContinuousDomain, BooleanResponse}) = ItemBankMirt2PL
 constructor(::SimpleItemBankSpec{StdModel3PL, VectorContinuousDomain, BooleanResponse}) = ItemBankMirt3PL
 constructor(::SimpleItemBankSpec{StdModel4PL, VectorContinuousDomain, BooleanResponse}) = ItemBankMirt4PL
-constructor(::SimpleItemBankSpec{StdModel2PL, ContinuousDomain, MultinomialResponse}) = ItemBankGPCM2PL
-constructor(::SimpleItemBankSpec{StdModel3PL, ContinuousDomain, MultinomialResponse}) = ItemBankGPCM3PL
-constructor(::SimpleItemBankSpec{StdModel4PL, ContinuousDomain, MultinomialResponse}) = ItemBankGPCM4PL
+constructor(::SimpleItemBankSpec{StdModel2PL, D, MultinomialResponse}) where {D <: ContinuousDomain} = ItemBankGPCM
 
 function ItemBank(spec::SimpleItemBankSpec, args...; kwargs...)
     constructor(spec)(args...; kwargs...)

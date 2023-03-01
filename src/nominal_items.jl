@@ -1,3 +1,8 @@
+using StaticArrays
+
+PerRankReal = AbstractArray{<: AbstractArray{<: Real}, 1}
+PerCategoryFloat = AbstractArray{<: AbstractArray{Float64}, 1}
+
 """
 This item bank implements the nominal model. The Graded Partial Credit Model
 (GPCM) is implemented in terms of this one. See:
@@ -18,10 +23,8 @@ https://doi.org/10.1007/978-1-4757-2691-6_9
 Currently, this item bank only supports the normal scaled logistic as the
 characteristic/transfer function.
 """
-PerCategoryFloat = AbstractArray{<: AbstractArray{Float64}}
-
-struct NominalItemBank{CategoryStorageT <: PerCategoryFloat} <: AbstractItemBank
-    ranks::CategoryStorageT # ak_1 ... ak_k
+struct NominalItemBank{RankStorageT <: PerRankReal, CategoryStorageT <: PerCategoryFloat} <: AbstractItemBank
+    ranks::RankStorageT # ak_1 ... ak_k
     discriminations::Matrix{Float64} # a_1 ... a_n
     cut_points::CategoryStorageT # d_1 ... d_k
 end
@@ -47,17 +50,16 @@ function GPCMItemBank(discriminations, cut_points::Matrix{Float64})
     GPCMItemBank(discriminations, nextedview(cut_points))
 end
 
-DomainType(::NominalItemBank) = OneDimContinuousDomain()
+DomainType(::NominalItemBank) = VectorContinuousDomain()
 ResponseType(::NominalItemBank) = MultinomialResponse()
 
-function Base.length(item_bank::NominalItemBank)
-    length(item_bank.difficulties)
-end
+Base.length(item_bank::NominalItemBank) = size(item_bank.discriminations, 2)
+domdims(item_bank::NominalItemBank) = size(item_bank.discriminations, 1)
 
 function linears(ir::ItemResponse{<:NominalItemBank}, θ)
-    aks = @view ir.item_bank.ranks[ir.index]
+    aks = ir.item_bank.ranks[ir.index]
     as = @view ir.item_bank.discriminations[:, ir.index]
-    ds = @view ir.item_bank.cut_points[ir.index]
+    ds = ir.item_bank.cut_points[ir.index]
     aks .* (dot(as, θ) .+ ds)
 end
 
@@ -73,16 +75,20 @@ function resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
     ir(θ)
 end
 
+function num_ranks(ir::ItemResponse{<:NominalItemBank})
+    length(ir.item_bank.ranks[ir.index])
+end
+
 function resp(ir::ItemResponse{<:NominalItemBank}, θ)
-    outs .= exp.(linears(ir, θ))
+    outs = StaticArrays.sacollect(SVector{num_ranks(ir), Float64}, exp.(linears(ir, θ)))
     outs ./ sum(outs)
 end
 
 function logresp(ir::ItemResponse{<:NominalItemBank}, θ)
-    outs .= linears(ir, θ)
+    outs = StaticArrays.sacollect(SVector{num_ranks(ir), Float64}, linears(ir, θ))
     outs .= outs - logsumexp(linears(ir, θ))
 end
 
 function item_params(item_bank::NominalItemBank, idx)
-    (; difficulty=item_bank.difficulties[idx], discrimination=item_bank.discriminations[idx])
+    (; discrimination=item_bank.discriminations[idx, :])
 end
