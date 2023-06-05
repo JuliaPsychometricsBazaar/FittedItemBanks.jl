@@ -3,13 +3,13 @@ using Documenter
 
 format = Documenter.HTML(
     prettyurls=get(ENV, "CI", "false") == "true",
-    canonical="https://JuliaPsychometricsBazzar.github.io/FittedItemBanks.jl",
+    canonical="https://JuliaPsychometricsBazaar.github.io/FittedItemBanks.jl",
 )
 
 makedocs(;
     modules=[FittedItemBanks],
     authors="Frankie Robertson",
-    repo="https://github.com/JuliaPsychometricsBazzar/FittedItemBanks.jl/blob/{commit}{path}#{line}",
+    repo="https://github.com/JuliaPsychometricsBazaar/FittedItemBanks.jl/blob/{commit}{path}#{line}",
     sitename="FittedItemBanks.jl",
     format=format,
     pages=[
@@ -19,6 +19,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/JuliaPsychometricsBazzar/FittedItemBanks.jl",
+    repo="github.com/JuliaPsychometricsBazaar/FittedItemBanks.jl",
     devbranch="main",
 )
