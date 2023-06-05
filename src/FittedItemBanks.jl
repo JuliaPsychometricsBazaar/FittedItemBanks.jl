@@ -12,7 +12,7 @@ export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
 
 export Smoother, KernelSmoother, DichotomousSmoothedItemBank, DichotomousPointsItemBank
 
-export domdims, ItemResponse, resp, resp_vec
+export domdims, ItemResponse, resp, resp_vec, responses
 
 export DomainType, DiscreteDomain, ContinuousDomain, VectorContinuousDomain
 export OneDimContinuousDomain, DiscreteIndexableDomain, DiscreteIterableDomain
@@ -118,6 +118,18 @@ An item response.
 struct ItemResponse{ItemBankT <: AbstractItemBank}
     item_bank::ItemBankT
     index::Int
+end
+
+function responses(ir::ItemResponse)
+    responses(ResponseType(ir.item_bank), ir)
+end
+
+function responses(::BooleanResponse, ir::ItemResponse)
+    SVector(false, true)
+end
+
+function responses(::MultinomialResponse, ir::ItemResponse)
+    1:num_response_categories(ir)
 end
 
 """
