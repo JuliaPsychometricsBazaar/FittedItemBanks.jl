@@ -7,6 +7,7 @@ using ArraysOfArrays: VectorOfArrays
 import ..SimpleItemBankSpec, ..StdModelForm, ..StdModel2PL, ..StdModel3PL, ..StdModel4PL
 import ..OneDimContinuousDomain, ..VectorContinuousDomain, ..BooleanResponse, ..MultinomialResponse, ..ItemBank
 import ..GuessItemBank, ..SlipItemBank
+import ..ItemResponse
 
 export dummy_item_bank, dummy_full
 
