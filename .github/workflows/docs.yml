@@ -12,6 +12,8 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 jobs:
   docs:
+    permissions:
+      contents: write
     name: Documentation
     runs-on: ubuntu-latest
     steps:
