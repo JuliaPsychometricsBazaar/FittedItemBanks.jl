@@ -499,7 +499,7 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 [[deps.PsychometricsBazaarBase]]
 deps = ["Cuba", "Cubature", "Distributions", "DocStringExtensions", "FillArrays", "HCubature", "Interpolations", "Lazy", "LinearAlgebra", "MacroTools", "Measurements", "MonteCarloIntegration", "NLSolversBase", "Optim", "OrderedCollections", "QuadGK", "UnPack"]
 path = "../../PsychometricsBazaarBase.jl"
-uuid = "8a5e4057-03e0-4a42-ba57-0eb88ce604f5"
+uuid = "b0d9cada-d963-45e9-a4c6-4746243987f1"
 version = "0.1.0"
 
 [[deps.QuadGK]]
