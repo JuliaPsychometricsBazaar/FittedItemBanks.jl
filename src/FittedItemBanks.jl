@@ -26,7 +26,7 @@ using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, 
 using Lazy: @forward
 using ArraysOfArrays: VectorOfArrays
 using StaticArrays: SVector
-using PsychometricsBazzarBase.ConstDistributions: normal_scaled_logistic
+using PsychometricsBazaarBase.ConstDistributions: normal_scaled_logistic
 using DocStringExtensions
 
 abstract type AbstractItemBank end

@@ -466,7 +466,7 @@ version = "0.5.3"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
-[[deps.PsychometricsBazzarBase]]
+[[deps.PsychometricsBazaarBase]]
 deps = ["Cuba", "Cubature", "Distributions", "DocStringExtensions", "FillArrays", "HCubature", "Interpolations", "Lazy", "LinearAlgebra", "MacroTools", "Measurements", "MonteCarloIntegration", "NLSolversBase", "Optim", "OrderedCollections", "QuadGK", "UnPack"]
 git-tree-sha1 = "2a5e87ac04620c01ca9f328dcd7923c017a217d3"
 uuid = "8a5e4057-03e0-4a42-ba57-0eb88ce604f5"
