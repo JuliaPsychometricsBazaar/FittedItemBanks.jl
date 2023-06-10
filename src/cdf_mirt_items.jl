@@ -66,3 +66,7 @@ end
 function cresp(ir::ItemResponse{<:CdfMirtItemBank}, θ)
     ccdf(ir.item_bank.distribution, norm_abil(ir, θ))
 end
+
+function item_params(item_bank::CdfMirtItemBank, idx)
+    (; difficulty=item_bank.difficulties[idx], discrimination=@view item_bank.discriminations[:, idx])
+end
