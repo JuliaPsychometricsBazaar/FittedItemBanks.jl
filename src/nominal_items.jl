@@ -47,7 +47,7 @@ function GPCMItemBank(discriminations, cut_points::PerCategoryFloat)
 end
 
 function GPCMItemBank(discriminations, cut_points::Matrix{Float64})
-    GPCMItemBank(discriminations, nextedview(cut_points))
+    GPCMItemBank(discriminations, nestedview(cut_points))
 end
 
 DomainType(::NominalItemBank) = VectorContinuousDomain()
