@@ -9,10 +9,11 @@ export AbstractItemBank, GuessItemBank
 export SlipItemBank, TransferItemBank
 export ItemBank2PL, ItemBank3PL, ItemBank4PL
 export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
+export NominalItemBank, GPCMItemBank
 
 export Smoother, KernelSmoother, DichotomousSmoothedItemBank, DichotomousPointsItemBank
 
-export domdims, ItemResponse, resp, resp_vec, responses
+export domdims, ItemResponse, resp, resp_vec, log_resp_vec, responses, item_params
 
 export DomainType, DiscreteDomain, ContinuousDomain, VectorContinuousDomain
 export OneDimContinuousDomain, DiscreteIndexableDomain, DiscreteIterableDomain
@@ -24,7 +25,7 @@ export SimpleItemBankSpec, StdModel2PL, StdModel3PL, StdModel4PL
 using Distributions
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
-using ArraysOfArrays: VectorOfArrays
+using ArraysOfArrays: VectorOfArrays, nestedview
 using StaticArrays: SVector
 using PsychometricsBazaarBase.ConstDistributions: normal_scaled_logistic
 using DocStringExtensions
