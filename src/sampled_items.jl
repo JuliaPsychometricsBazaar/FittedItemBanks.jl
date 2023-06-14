@@ -88,6 +88,15 @@ function resp_vec(ir::ItemResponse{<:DichotomousSmoothedItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
+function resp(ir::ItemResponse{<:DichotomousSmoothedItemBank{<:KernelSmoother}}, outcome::Bool, θ)
+    r = resp(ir, θ)
+    if outcome
+        r
+    else
+        1.0 - r
+    end
+end
+
 function resp(ir::ItemResponse{<:DichotomousSmoothedItemBank{<:KernelSmoother}}, θ)
     # XXX: Avoid allocating here? @turbo here?
     kernel_comb = ir.item_bank.smoother.kernel.((ir.item_bank.inner_bank.xs .- θ) ./ ir.item_bank.smoother.bandwidths[ir.index])
