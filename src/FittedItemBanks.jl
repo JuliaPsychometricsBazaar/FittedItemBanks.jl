@@ -13,7 +13,7 @@ export NominalItemBank, GPCMItemBank
 
 export Smoother, KernelSmoother, DichotomousSmoothedItemBank, DichotomousPointsItemBank
 
-export domdims, ItemResponse, resp, resp_vec, log_resp_vec, responses, item_params
+export domdims, ItemResponse, resp, resp_vec, responses, item_params
 
 export DomainType, DiscreteDomain, ContinuousDomain, VectorContinuousDomain
 export OneDimContinuousDomain, DiscreteIndexableDomain, DiscreteIterableDomain
