@@ -1,7 +1,7 @@
 name = "FittedItemBanks"
 uuid = "3f797b09-34e4-41d7-acf6-3302ae3248a5"
 authors = ["Frankie Robertson <frankie@robertson.name>"]
-version = "0.3.2"
+version = "0.3.3"
 
 [deps]
 ArraysOfArrays = "65a8f2f4-9b39-5baf-92e2-a9cc46fdf018"
@@ -19,7 +19,7 @@ ArraysOfArrays = "0.6"
 Distributions = "0.25"
 DocStringExtensions = "0.9"
 Lazy = "0.15"
-PsychometricsBazaarBase = "^0.3.0, ^0.4.0, ^0.5.0"
+PsychometricsBazaarBase = "^0.3.0, ^0.4.0, ^0.5.0, ^0.6.0"
 Setfield = "0.8, 1"
 StaticArrays = "1"
 julia = "^1.8"
