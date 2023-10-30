@@ -36,6 +36,10 @@ function Base.eachindex(item_bank::AbstractItemBank)
     Base.OneTo(length(item_bank))
 end
 
+function item_params(item_bank::AbstractItemBank, idx)
+    (;)
+end
+
 """
 $(TYPEDEF)
 
