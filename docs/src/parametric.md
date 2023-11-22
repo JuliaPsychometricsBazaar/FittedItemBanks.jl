@@ -18,5 +18,5 @@ combining different blocks to build a variety of model parameterisations.
 
 ```@autodocs
 Modules = [FittedItemBanks]
-Pages   = ["cdf_items.jl", "cdf_mirt_items.jl", "guess_slip_items.jl", "nominal_items.jl"]
+Pages   = ["cdf_items.jl", "cdf_mirt_items.jl", "guess_slip_items.jl", "nominal_items.jl", "monopoly.jl", "bspline.jl"]
 ```

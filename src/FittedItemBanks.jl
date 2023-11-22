@@ -10,6 +10,8 @@ export SlipItemBank, TransferItemBank
 export ItemBank2PL, ItemBank3PL, ItemBank4PL
 export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
 export NominalItemBank, GPCMItemBank
+export MonopolyItemBank
+export BSplineItemBank
 
 export Smoother, KernelSmoother, DichotomousSmoothedItemBank, DichotomousPointsItemBank
 
@@ -29,6 +31,9 @@ using ArraysOfArrays: VectorOfArrays, nestedview
 using StaticArrays: SVector
 using PsychometricsBazaarBase.ConstDistributions: normal_scaled_logistic
 using DocStringExtensions
+using ArraysOfArrays
+using BSplines
+using BSplines: NoDerivative, bsplines_destarray, _bsplines!, bsplines_offsetarray
 
 abstract type AbstractItemBank end
 
@@ -229,6 +234,8 @@ end
 include("./guess_slip_items.jl")
 include("./cdf_items.jl")
 include("./cdf_mirt_items.jl")
+include("./monopoly.jl")
+include("./bspline.jl")
 include("./sampled_items.jl")
 include("./nominal_items.jl")
 include("./porcelain.jl")
