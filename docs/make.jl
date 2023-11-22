@@ -1,5 +1,6 @@
 using FittedItemBanks
 using Documenter
+using Documenter.Remotes: GitHub
 
 format = Documenter.HTML(
     prettyurls=get(ENV, "CI", "false") == "true",
@@ -9,7 +10,7 @@ format = Documenter.HTML(
 makedocs(;
     modules=[FittedItemBanks],
     authors="Frankie Robertson",
-    repo="https://github.com/JuliaPsychometricsBazaar/FittedItemBanks.jl/blob/{commit}{path}#{line}",
+    repo = GitHub("JuliaPsychometricsBazaar", "FittedItemBanks.jl"),
     sitename="FittedItemBanks.jl",
     format=format,
     pages=[
