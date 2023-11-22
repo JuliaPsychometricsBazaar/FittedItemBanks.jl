@@ -17,6 +17,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 ArraysOfArrays = "0.6"
+BSplines = "0.3.3"
 Distributions = "0.25"
 DocStringExtensions = "0.9"
 Lazy = "0.15"
