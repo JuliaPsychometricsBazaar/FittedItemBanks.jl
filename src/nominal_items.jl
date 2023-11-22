@@ -4,24 +4,24 @@ PerRankReal = AbstractArray{<: AbstractArray{<: Real}, 1}
 PerCategoryFloat = AbstractArray{<: AbstractArray{Float64}, 1}
 
 """
+$(TYPEDEF)
+
 This item bank implements the nominal model. The Graded Partial Credit Model
-(GPCM) is implemented in terms of this one. See:
-
-*A Generalized Partial Credit Model: Application of an EM Algorithm*
-Muraki, E., (1992).
-Applied Psychological Measurement
-10.1177/014662169201600206
-
-And/or
-
-*A Generalized Partial Credit Model*
-Muraki, E. (1997). 
-In Handbook of Modern Item Response Theory.
-Springer, New York, NY.
-https://doi.org/10.1007/978-1-4757-2691-6_9
+(GPCM) is implemented in terms of this one.
 
 Currently, this item bank only supports the normal scaled logistic as the
 characteristic/transfer function.
+
+### References:
+
+ * [*A Generalized Partial Credit Model: Application of an EM Algorithm*,
+    Muraki, E., (1992).
+    Applied Psychological Measurement.
+   ](https://doi.org/10.1177/014662169201600206)
+ * [*A Generalized Partial Credit Model*,
+    Muraki, E. (1997).
+    In Handbook of Modern Item Response Theory.
+   ](https://doi.org/10.1007/978-1-4757-2691-6_9)
 """
 struct NominalItemBank{RankStorageT <: PerRankReal, CategoryStorageT <: PerCategoryFloat} <: AbstractItemBank
     ranks::RankStorageT # ak_1 ... ak_k
