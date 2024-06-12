@@ -11,6 +11,14 @@ function Base.length(item_bank::TransferItemBank)
     length(item_bank.difficulties)
 end
 
+function subset(item_bank::TransferItemBank, idxs)
+    TransferItemBank(
+        item_bank.distribution,
+        item_bank.difficulties[idxs],
+        item_bank.discriminations[idxs]
+    )
+end
+
 function _norm_abil_1d(θ, difficulty, discrimination)
     (θ - difficulty) * discrimination
 end

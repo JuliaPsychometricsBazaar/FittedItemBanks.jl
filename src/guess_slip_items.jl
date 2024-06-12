@@ -17,6 +17,7 @@ struct FixedGuessItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
 end
 y_offset(item_bank::FixedGuessItemBank, item_idx) = item_bank.guess
 @forward FixedGuessItemBank.inner_bank Base.length, domdims
+subset(item_bank::FixedGuessItemBank, idxs) = FixedGuessItemBank(item_bank.guess, subset(item_bank.inner_bank, idxs))
 function item_params(item_bank::FixedGuessItemBank, idx)
     (;item_params(item_bank.inner_bank, idx)..., guess=item_bank.guess)
 end
@@ -29,7 +30,8 @@ struct FixedSlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
     FixedSlipItemBank(::BooleanResponse, slip, inner_bank) = new{typeof(inner_bank)}(slip, inner_bank)
 end
 y_offset(item_bank::FixedSlipItemBank, item_idx) = item_bank.slip
-@forward FixedSlipItemBank.inner_bank Base.length, domdims
+@forward FixedSlipItemBank.inner_bank Base.length, domdims, subset
+subset(item_bank::FixedSlipItemBank, idxs) = FixedSlipItemBank(item_bank.slip, subset(item_bank.inner_bank, idxs))
 function item_params(item_bank::FixedSlipItemBank, idx)
     (;item_params(item_bank.inner_bank, idx)..., slip=item_bank.slip)
 end
@@ -43,6 +45,7 @@ struct GuessItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
 end
 y_offset(item_bank::GuessItemBank, item_idx) = item_bank.guesses[item_idx]
 @forward GuessItemBank.inner_bank Base.length, domdims
+subset(item_bank::GuessItemBank, idxs) = FixedSlipItemBank(item_bank.guesses[idxs], subset(item_bank.inner_bank, idxs))
 function item_params(item_bank::GuessItemBank, idx)
     (;item_params(item_bank.inner_bank, idx)..., guess=item_bank.guesses[idx])
 end
@@ -56,6 +59,7 @@ struct SlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
 end
 y_offset(item_bank::SlipItemBank, item_idx) = item_bank.slips[item_idx]
 @forward SlipItemBank.inner_bank Base.length, domdims
+subset(item_bank::SlipItemBank, idxs) = FixedSlipItemBank(item_bank.slips[idxs], subset(item_bank.inner_bank, idxs))
 function item_params(item_bank::SlipItemBank, idx)
     (;item_params(item_bank.inner_bank, idx)..., slip=item_bank.slips[idx])
 end
