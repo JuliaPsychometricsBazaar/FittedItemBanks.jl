@@ -13,7 +13,9 @@ export NominalItemBank, GPCMItemBank
 export MonopolyItemBank
 export BSplineItemBank
 
-export Smoother, KernelSmoother, DichotomousSmoothedItemBank, DichotomousPointsItemBank
+export Smoother, KernelSmoother, NearestNeighborSmoother
+export PointsItemBank
+export DichotomousSmoothedItemBank, DichotomousPointsItemBank, MultiGridDichotomousPointsItemBank 
 
 export domdims, ItemResponse, resp, resp_vec, responses, item_params
 
@@ -30,6 +32,7 @@ using Lazy: @forward
 using ArraysOfArrays: VectorOfArrays, nestedview
 using StaticArrays: SVector
 using PsychometricsBazaarBase.ConstDistributions: normal_scaled_logistic
+using PsychometricsBazaarBase.Interpolators: interp
 using DocStringExtensions
 using ArraysOfArrays
 using BSplines
