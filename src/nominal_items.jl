@@ -56,15 +56,11 @@ ResponseType(::NominalItemBank) = MultinomialResponse()
 Base.length(item_bank::NominalItemBank) = size(item_bank.discriminations, 2)
 domdims(item_bank::NominalItemBank) = size(item_bank.discriminations, 1)
 
-function linears(ir::ItemResponse{<:NominalItemBank}, θ)
+function resp_logdensity_vec(ir::ItemResponse{<:NominalItemBank}, θ)
     aks = ir.item_bank.ranks[ir.index]
     as = @view ir.item_bank.discriminations[:, ir.index]
     ds = ir.item_bank.cut_points[ir.index]
-    aks .* (dot(as, θ) .+ ds)
-end
-
-function (ir::ItemResponse{<:NominalItemBank})(θ)
-    resp(ir, θ)
+    StaticArrays.sacollect(SVector{num_ranks(ir), Float64}, aks .* (dot(as, θ) .+ ds))
 end
 
 function num_response_categories(ir::ItemResponse{<:NominalItemBank})
@@ -72,21 +68,17 @@ function num_response_categories(ir::ItemResponse{<:NominalItemBank})
 end
 
 function resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
-    ir(θ)
+    outs = exp.(resp_logdensity_vec(ir, θ))
+    outs ./ sum(outs)
 end
 
 function num_ranks(ir::ItemResponse{<:NominalItemBank})
     length(ir.item_bank.ranks[ir.index])
 end
 
-function resp(ir::ItemResponse{<:NominalItemBank}, θ)
-    outs = StaticArrays.sacollect(SVector{num_ranks(ir), Float64}, exp.(linears(ir, θ)))
-    outs ./ sum(outs)
-end
-
-function logresp(ir::ItemResponse{<:NominalItemBank}, θ)
-    outs = StaticArrays.sacollect(SVector{num_ranks(ir), Float64}, linears(ir, θ))
-    outs .= outs - logsumexp(linears(ir, θ))
+function log_resp(ir::ItemResponse{<:NominalItemBank}, θ)
+    outs = resp_logdensity_vec(ir, θ)
+    outs .- logsumexp(outs)
 end
 
 function item_params(item_bank::NominalItemBank, idx)

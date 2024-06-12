@@ -24,6 +24,14 @@ function Base.length(item_bank::BSplineItemBank)
     length(item_bank.bases)
 end
 
+function resp_logdensity(ir::ItemResponse{<:BSplineItemBank}, θ)
+    # TODO: This extrapolation does not seem to keep monotonicity :-(
+    # Solvable?
+    bspline_vals = bsplines_cubic_extrap(ir.item_bank.bases[ir.index], θ)
+    item_params = ir.item_bank.params[ir.index]
+    dot(bspline_vals, item_params)
+end
+
 function resp_vec(ir::ItemResponse{<:BSplineItemBank}, θ)
     resp1 = resp(ir, θ)
     SVector(1.0 - resp1, resp1)
@@ -57,11 +65,5 @@ function bsplines_cubic_extrap(basis, x)
 end
 
 function resp(ir::ItemResponse{<:BSplineItemBank}, θ)
-    # TODO: This extrapolation does not seem to keep monotonicity :-(
-    # Solvable?
-    bspline_vals = bsplines_cubic_extrap(ir.item_bank.bases[ir.index], θ)
-    item_params = ir.item_bank.params[ir.index]
-    #@info "resp" bspline_vals item_params
-    pred = dot(bspline_vals, item_params)
-    return 1.0 / (1.0 + exp(-pred))
+    return 1.0 / (1.0 + exp(-resp_logdensity(ir, θ)))
 end
