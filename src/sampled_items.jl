@@ -35,9 +35,15 @@ struct DichotomousPointsItemBank <: PointsItemBank
     ys::Array{Float64, 2}
 end
 
+DomainType(::DichotomousPointsItemBank) = DiscreteIndexableDomain()
+domdims(::DichotomousPointsItemBank) = 0
 ResponseType(::DichotomousPointsItemBank) = BooleanResponse()
 function Base.length(item_bank::DichotomousPointsItemBank)
     size(item_bank.ys, 2)
+end
+
+function item_bank_xs(item_bank::DichotomousPointsItemBank)
+    item_bank.xs
 end
 
 function item_domain(ir::ItemResponse{<:DichotomousPointsItemBank})
@@ -66,6 +72,8 @@ struct MultiGridDichotomousPointsItemBank <: PointsItemBank
     ys::VectorOfVectors{Float64}
 end
 
+DomainType(::MultiGridDichotomousPointsItemBank) = DiscreteIndexableDomain()
+domdims(::MultiGridDichotomousPointsItemBank) = 0
 ResponseType(::MultiGridDichotomousPointsItemBank) = BooleanResponse()
 function Base.length(item_bank::MultiGridDichotomousPointsItemBank)
     length(item_bank.ys)
