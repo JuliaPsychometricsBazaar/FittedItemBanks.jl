@@ -30,8 +30,8 @@ latent/ability dimension specified as `xs`. The responses are stored in `ys`.
 In most cases this item banks will be coupled with a `Smoother` and wrapped in
 a `DichotomousSmoothedItemBank`.
 """
-struct DichotomousPointsItemBank <: PointsItemBank
-    xs::Vector{Float64}
+struct DichotomousPointsItemBank{DomainT} <: PointsItemBank
+    xs::DomainT
     ys::Array{Float64, 2}
 end
 
