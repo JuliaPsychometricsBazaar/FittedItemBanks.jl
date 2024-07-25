@@ -133,6 +133,9 @@ struct ItemResponse{ItemBankT <: AbstractItemBank}
     index::Int
 end
 
+# Mark as a scalar for broadcasting
+Base.broadcastable(ir::ItemResponse) = Ref(ir)
+
 function responses(ir::ItemResponse)
     responses(ResponseType(ir.item_bank), ir)
 end
