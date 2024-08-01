@@ -37,6 +37,7 @@ using DocStringExtensions
 using ArraysOfArrays
 using BSplines
 using BSplines: NoDerivative, bsplines_destarray, _bsplines!, bsplines_offsetarray
+using LogExpFunctions
 
 abstract type AbstractItemBank end
 
