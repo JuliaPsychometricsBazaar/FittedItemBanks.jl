@@ -76,7 +76,12 @@ function num_ranks(ir::ItemResponse{<:NominalItemBank})
     length(ir.item_bank.ranks[ir.index])
 end
 
-function log_resp(ir::ItemResponse{<:NominalItemBank}, θ)
+function log_resp(ir::ItemResponse{<:NominalItemBank}, resp, θ)
+    outs = resp_logdensity_vec(ir, θ)
+    outs[resp] .- logsumexp(outs)
+end
+
+function log_resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
     outs = resp_logdensity_vec(ir, θ)
     outs .- logsumexp(outs)
 end
