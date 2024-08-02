@@ -3,7 +3,7 @@ $(SIGNATURES)
 
 A guassian kernel for use with `KernelSmoother`
 """
-gauss_kern(u) = exp(-u^2.0/2)
+gauss_kern(u) = exp(-u^2.0 / 2)
 
 """
 $(SIGNATURES)
@@ -47,7 +47,7 @@ function item_bank_xs(item_bank::DichotomousPointsItemBank)
 end
 
 function item_domain(ir::ItemResponse{<:DichotomousPointsItemBank})
-   (ir.item_bank.xs[1], ir.item_bank.xs[end])
+    (ir.item_bank.xs[1], ir.item_bank.xs[end])
 end
 
 function item_xs(ir::ItemResponse{<:DichotomousPointsItemBank})
@@ -80,7 +80,7 @@ function Base.length(item_bank::MultiGridDichotomousPointsItemBank)
 end
 
 function item_domain(ir::ItemResponse{<:MultiGridDichotomousPointsItemBank})
-   (ir.item_bank.xs[ir.index][1], ir.item_bank.xs[ir.index][end])
+    (ir.item_bank.xs[ir.index][1], ir.item_bank.xs[ir.index][end])
 end
 
 function item_xs(ir::ItemResponse{<:MultiGridDichotomousPointsItemBank})
@@ -131,14 +131,16 @@ end
 
 DomainType(::DichotomousSmoothedItemBank) = OneDimContinuousDomain()
 ResponseType(::DichotomousSmoothedItemBank) = BooleanResponse()
-inner_item_response(ir::ItemResponse{<: DichotomousSmoothedItemBank}) = ItemResponse(ir.item_bank.inner_bank, ir.index)
+function inner_item_response(ir::ItemResponse{<:DichotomousSmoothedItemBank})
+    ItemResponse(ir.item_bank.inner_bank, ir.index)
+end
 
 function Base.length(item_bank::DichotomousSmoothedItemBank)
     length(item_bank.inner_bank)
 end
 
 function item_domain(ir::ItemResponse{<:DichotomousSmoothedItemBank})
-   item_domain(ItemResponse(ir.item_bank.inner_bank, ir.index))
+    item_domain(ItemResponse(ir.item_bank.inner_bank, ir.index))
 end
 
 function resp_vec(ir::ItemResponse{<:DichotomousSmoothedItemBank}, θ)
@@ -155,10 +157,13 @@ function resp(ir::ItemResponse{<:DichotomousSmoothedItemBank}, outcome::Bool, θ
     end
 end
 
-function resp(ir::ItemResponse{<:DichotomousSmoothedItemBank{<:PointsItemBank, <:KernelSmoother}}, θ)
+function resp(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{<:PointsItemBank, <:KernelSmoother}},
+        θ)
     # XXX: Avoid allocating here? @turbo here?
     inner_ir = inner_item_response(ir)
-    kernel_comb = ir.item_bank.smoother.kernel.((item_xs(inner_ir) .- θ) ./ ir.item_bank.smoother.bandwidths[ir.index])
+    kernel_comb = ir.item_bank.smoother.kernel.((item_xs(inner_ir) .- θ) ./
+                                                ir.item_bank.smoother.bandwidths[ir.index])
     sum(kernel_comb .* (item_ys(inner_ir))) / sum(kernel_comb)
 end
 
@@ -167,16 +172,19 @@ function nearest_index(xs, ys, θ)
     if (
         neighbor_idx != 1 &&
         (
-            (neighbor_idx == length(xs) + 1) ||
-            ((θ - xs[neighbor_idx - 1]) < (xs[neighbor_idx] - θ))
-        )
+        (neighbor_idx == length(xs) + 1) ||
+        ((θ - xs[neighbor_idx - 1]) < (xs[neighbor_idx] - θ))
+    )
     )
         neighbor_idx = neighbor_idx - 1
     end
     return neighbor_idx
 end
 
-function resp(ir::ItemResponse{<:DichotomousSmoothedItemBank{<:PointsItemBank, <:NearestNeighborSmoother}}, θ)
+function resp(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, <:NearestNeighborSmoother}},
+        θ)
     inner_ir = inner_item_response(ir)
     xs = item_xs(inner_ir)
     ys = item_ys(inner_ir)
@@ -187,7 +195,8 @@ function nearest_indices(xs, ys, thetas)
     pivot_theta_idx = length(thetas) ÷ 2
     pivot_theta = thetas[pivot_theta_idx]
     pivot_xs_idx = nearest_index(xs, ys, pivot_theta)
-    nearest_indices((@view xs[1:pivot_xs_idx]), (@view ys[1:pivot_xs_idx]), (@view thetas[1:(pivot_theta - 1)]))
+    nearest_indices((@view xs[1:pivot_xs_idx]), (@view ys[1:pivot_xs_idx]),
+        (@view thetas[1:(pivot_theta - 1)]))
 end
 
 #=

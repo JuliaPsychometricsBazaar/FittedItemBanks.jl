@@ -47,7 +47,7 @@ function resp(ir::ItemResponse{<:BSplineItemBank}, outcome::Bool, θ)
 end
 
 function bsplines_unchecked(basis::BSplineBasis, leftknot, x,
-                            drv=NoDerivative(); derivspace=nothing)
+        drv = NoDerivative(); derivspace = nothing)
     dest = bsplines_destarray(basis, x, drv, derivspace)
     offset = @inbounds _bsplines!(dest, derivspace, basis, x, leftknot, drv)
     bsplines_offsetarray(dest, offset, drv)

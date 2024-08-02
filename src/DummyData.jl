@@ -5,7 +5,8 @@ using Random
 using ArraysOfArrays: VectorOfArrays
 
 import ..SimpleItemBankSpec, ..StdModelForm, ..StdModel2PL, ..StdModel3PL, ..StdModel4PL
-import ..OneDimContinuousDomain, ..VectorContinuousDomain, ..BooleanResponse, ..MultinomialResponse, ..ItemBank
+import ..OneDimContinuousDomain, ..VectorContinuousDomain, ..BooleanResponse,
+       ..MultinomialResponse, ..ItemBank
 import ..GuessItemBank, ..SlipItemBank
 import ..ItemResponse
 
@@ -22,7 +23,9 @@ clamp_rand(rng, dist, dims...) = clamp.(rand(rng, dist, dims...), 0.0, 0.4)
 
 dummy_difficulties(rng, num_questions) = rand(rng, std_normal, num_questions)
 dummy_discriminations(rng, num_questions) = abs_rand(rng, Normal(1.0, 0.2), num_questions)
-dummy_discriminations(rng, dims, num_questions) = abs_rand(rng, Normal(1.0, 0.2), dims, num_questions)
+function dummy_discriminations(rng, dims, num_questions)
+    abs_rand(rng, Normal(1.0, 0.2), dims, num_questions)
+end
 dummy_guesses(rng, num_questions) = clamp_rand(rng, Normal(0.0, 0.2), num_questions)
 dummy_slips(rng, num_questions) = clamp_rand(rng, Normal(0.0, 0.2), num_questions)
 
@@ -35,7 +38,9 @@ function dummy_cut_points(rng, num_questions)
     cut_points_ragged
 end
 
-function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel2PL, OneDimContinuousDomain, BooleanResponse}, num_questions)
+function dummy_item_bank(rng::AbstractRNG,
+        spec::SimpleItemBankSpec{StdModel2PL, OneDimContinuousDomain, BooleanResponse},
+        num_questions)
     ItemBank(
         spec,
         dummy_difficulties(rng, num_questions),
@@ -43,7 +48,9 @@ function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel2PL,
     )
 end
 
-function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel2PL, VectorContinuousDomain, BooleanResponse}, num_questions, dims)
+function dummy_item_bank(rng::AbstractRNG,
+        spec::SimpleItemBankSpec{StdModel2PL, VectorContinuousDomain, BooleanResponse},
+        num_questions, dims)
     ItemBank(
         spec,
         dummy_difficulties(rng, num_questions),
@@ -51,7 +58,9 @@ function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel2PL,
     )
 end
 
-function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel2PL, OneDimContinuousDomain, MultinomialResponse}, num_questions)
+function dummy_item_bank(rng::AbstractRNG,
+        spec::SimpleItemBankSpec{StdModel2PL, OneDimContinuousDomain, MultinomialResponse},
+        num_questions)
     ItemBank(
         spec,
         dummy_discriminations(rng, num_questions),
@@ -59,7 +68,9 @@ function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel2PL,
     )
 end
 
-function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel2PL, VectorContinuousDomain, MultinomialResponse}, num_questions, dims)
+function dummy_item_bank(rng::AbstractRNG,
+        spec::SimpleItemBankSpec{StdModel2PL, VectorContinuousDomain, MultinomialResponse},
+        num_questions, dims)
     ItemBank(
         spec,
         dummy_discriminations(rng, dims, num_questions),
@@ -67,28 +78,35 @@ function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel2PL,
     )
 end
 
-function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel3PL}, num_questions, rest...)
+function dummy_item_bank(
+        rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel3PL}, num_questions, rest...)
     GuessItemBank(
         dummy_guesses(rng, num_questions),
-        dummy_item_bank(rng, SimpleItemBankSpec(StdModel2PL(), spec.domain, spec.response), num_questions, rest...)
+        dummy_item_bank(rng, SimpleItemBankSpec(StdModel2PL(), spec.domain, spec.response),
+            num_questions, rest...)
     )
 end
 
-function dummy_item_bank(rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel4PL}, num_questions, rest...)
+function dummy_item_bank(
+        rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel4PL}, num_questions, rest...)
     SlipItemBank(
         dummy_slips(rng, num_questions),
-        dummy_item_bank(rng, SimpleItemBankSpec(StdModel3PL(), spec.domain, spec.response), num_questions, rest...)
+        dummy_item_bank(rng, SimpleItemBankSpec(StdModel3PL(), spec.domain, spec.response),
+            num_questions, rest...)
     )
 end
 
-dummy_item_bank(spec::SimpleItemBankSpec, args...) = dummy_item_bank(Random.default_rng(), spec, args...)
+function dummy_item_bank(spec::SimpleItemBankSpec, args...)
+    dummy_item_bank(Random.default_rng(), spec, args...)
+end
 
 function item_bank_to_full_dummy(rng, item_bank, num_testees)
-    (item_bank, abilities, responses) = mirt_item_bank_to_full_dummy(rng, item_bank, num_testees, 1; squeeze=true)
+    (item_bank, abilities, responses) = mirt_item_bank_to_full_dummy(
+        rng, item_bank, num_testees, 1; squeeze = true)
     (item_bank, abilities[1, :], responses)
 end
 
-function mirt_item_bank_to_full_dummy(rng, item_bank, num_testees, dims; squeeze=false)
+function mirt_item_bank_to_full_dummy(rng, item_bank, num_testees, dims; squeeze = false)
     num_questions = length(item_bank)
     abilities = rand(rng, std_normal, dims, num_testees)
     irs = zeros(num_questions, num_testees)
@@ -106,14 +124,23 @@ function mirt_item_bank_to_full_dummy(rng, item_bank, num_testees, dims; squeeze
     (item_bank, abilities, responses)
 end
 
-function dummy_full(rng::AbstractRNG, spec::SimpleItemBankSpec{<: StdModelForm, <: OneDimContinuousDomain} ;num_questions=default_num_questions, num_testees=default_num_testees)
+function dummy_full(rng::AbstractRNG,
+        spec::SimpleItemBankSpec{<:StdModelForm, <:OneDimContinuousDomain};
+        num_questions = default_num_questions,
+        num_testees = default_num_testees)
     item_bank_to_full_dummy(rng, dummy_item_bank(rng, spec, num_questions), num_testees)
 end
 
-function dummy_full(rng::AbstractRNG, spec::SimpleItemBankSpec{<: StdModelForm, <: VectorContinuousDomain}, dims; num_questions=default_num_questions, num_testees=default_num_testees)
-    mirt_item_bank_to_full_dummy(rng, dummy_item_bank(rng, spec, num_questions, dims), num_testees, dims)
+function dummy_full(rng::AbstractRNG,
+        spec::SimpleItemBankSpec{<:StdModelForm, <:VectorContinuousDomain},
+        dims; num_questions = default_num_questions,
+        num_testees = default_num_testees)
+    mirt_item_bank_to_full_dummy(
+        rng, dummy_item_bank(rng, spec, num_questions, dims), num_testees, dims)
 end
 
-dummy_full(spec::SimpleItemBankSpec, args...; kwargs...) = dummy_full(Random.default_rng(), spec, args...; kwargs...)
+function dummy_full(spec::SimpleItemBankSpec, args...; kwargs...)
+    dummy_full(Random.default_rng(), spec, args...; kwargs...)
+end
 
 end

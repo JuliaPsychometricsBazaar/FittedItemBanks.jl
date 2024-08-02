@@ -1,7 +1,7 @@
 using StaticArrays
 
-PerRankReal = AbstractArray{<: AbstractArray{<: Real}, 1}
-PerCategoryFloat = AbstractArray{<: AbstractArray{Float64}, 1}
+PerRankReal = AbstractArray{<:AbstractArray{<:Real}, 1}
+PerCategoryFloat = AbstractArray{<:AbstractArray{Float64}, 1}
 
 """
 $(TYPEDEF)
@@ -23,13 +23,15 @@ characteristic/transfer function.
     In Handbook of Modern Item Response Theory.
    ](https://doi.org/10.1007/978-1-4757-2691-6_9)
 """
-struct NominalItemBank{RankStorageT <: PerRankReal, CategoryStorageT <: PerCategoryFloat} <: AbstractItemBank
+struct NominalItemBank{RankStorageT <: PerRankReal, CategoryStorageT <: PerCategoryFloat} <:
+       AbstractItemBank
     ranks::RankStorageT # ak_1 ... ak_k
     discriminations::Matrix{Float64} # a_1 ... a_n
     cut_points::CategoryStorageT # d_1 ... d_k
 end
 
-function NominalItemBank(ranks::Matrix{Float64}, discriminations::Matrix{Float64}, cut_points::Matrix{Float64})
+function NominalItemBank(ranks::Matrix{Float64}, discriminations::Matrix{Float64},
+        cut_points::Matrix{Float64})
     NominalItemBank(nestedview(ranks), discriminations, nestedview(cut_points))
 end
 
@@ -87,5 +89,5 @@ function log_resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
 end
 
 function item_params(item_bank::NominalItemBank, idx)
-    (; discrimination=item_bank.discriminations[idx, :])
+    (; discrimination = item_bank.discriminations[idx, :])
 end

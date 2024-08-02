@@ -12,66 +12,93 @@ struct FixedGuessItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
     guess::Float64
     inner_bank::InnerItemBank
 
-    FixedGuessItemBank(guess, inner_bank) = FixedGuessItemBank(ResponseType(inner_bank), guess, inner_bank)
-    FixedGuessItemBank(::BooleanResponse, guess, inner_bank) = new{typeof(inner_bank)}(guess, inner_bank)
+    function FixedGuessItemBank(guess, inner_bank)
+        FixedGuessItemBank(ResponseType(inner_bank), guess, inner_bank)
+    end
+    function FixedGuessItemBank(::BooleanResponse, guess, inner_bank)
+        new{typeof(inner_bank)}(guess, inner_bank)
+    end
 end
 y_offset(item_bank::FixedGuessItemBank, item_idx) = item_bank.guess
 @forward FixedGuessItemBank.inner_bank Base.length, domdims
-subset(item_bank::FixedGuessItemBank, idxs) = FixedGuessItemBank(item_bank.guess, subset(item_bank.inner_bank, idxs))
+function subset(item_bank::FixedGuessItemBank, idxs)
+    FixedGuessItemBank(item_bank.guess, subset(item_bank.inner_bank, idxs))
+end
 function item_params(item_bank::FixedGuessItemBank, idx)
-    (;item_params(item_bank.inner_bank, idx)..., guess=item_bank.guess)
+    (; item_params(item_bank.inner_bank, idx)..., guess = item_bank.guess)
 end
 
 struct FixedSlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
     slip::Float64
     inner_bank::InnerItemBank
 
-    FixedSlipItemBank(slip, inner_bank) = FixedSlipItemBank(ResponseType(inner_bank), slip, inner_bank)
-    FixedSlipItemBank(::BooleanResponse, slip, inner_bank) = new{typeof(inner_bank)}(slip, inner_bank)
+    function FixedSlipItemBank(slip, inner_bank)
+        FixedSlipItemBank(ResponseType(inner_bank), slip, inner_bank)
+    end
+    function FixedSlipItemBank(::BooleanResponse, slip, inner_bank)
+        new{typeof(inner_bank)}(slip, inner_bank)
+    end
 end
 y_offset(item_bank::FixedSlipItemBank, item_idx) = item_bank.slip
 @forward FixedSlipItemBank.inner_bank Base.length, domdims, subset
-subset(item_bank::FixedSlipItemBank, idxs) = FixedSlipItemBank(item_bank.slip, subset(item_bank.inner_bank, idxs))
+function subset(item_bank::FixedSlipItemBank, idxs)
+    FixedSlipItemBank(item_bank.slip, subset(item_bank.inner_bank, idxs))
+end
 function item_params(item_bank::FixedSlipItemBank, idx)
-    (;item_params(item_bank.inner_bank, idx)..., slip=item_bank.slip)
+    (; item_params(item_bank.inner_bank, idx)..., slip = item_bank.slip)
 end
 
 struct GuessItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
     guesses::Vector{Float64}
     inner_bank::InnerItemBank
 
-    GuessItemBank(guesses, inner_bank) = GuessItemBank(ResponseType(inner_bank), guesses, inner_bank)
-    GuessItemBank(::BooleanResponse, guesses, inner_bank) = new{typeof(inner_bank)}(guesses, inner_bank)
+    function GuessItemBank(guesses, inner_bank)
+        GuessItemBank(ResponseType(inner_bank), guesses, inner_bank)
+    end
+    function GuessItemBank(::BooleanResponse, guesses, inner_bank)
+        new{typeof(inner_bank)}(guesses, inner_bank)
+    end
 end
 y_offset(item_bank::GuessItemBank, item_idx) = item_bank.guesses[item_idx]
 @forward GuessItemBank.inner_bank Base.length, domdims
-subset(item_bank::GuessItemBank, idxs) = FixedSlipItemBank(item_bank.guesses[idxs], subset(item_bank.inner_bank, idxs))
+function subset(item_bank::GuessItemBank, idxs)
+    FixedSlipItemBank(item_bank.guesses[idxs], subset(item_bank.inner_bank, idxs))
+end
 function item_params(item_bank::GuessItemBank, idx)
-    (;item_params(item_bank.inner_bank, idx)..., guess=item_bank.guesses[idx])
+    (; item_params(item_bank.inner_bank, idx)..., guess = item_bank.guesses[idx])
 end
 
 struct SlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
     slips::Vector{Float64}
     inner_bank::InnerItemBank
 
-    SlipItemBank(slips, inner_bank) = SlipItemBank(ResponseType(inner_bank), slips, inner_bank)
-    SlipItemBank(::BooleanResponse, slips, inner_bank) = new{typeof(inner_bank)}(slips, inner_bank)
+    function SlipItemBank(slips, inner_bank)
+        SlipItemBank(ResponseType(inner_bank), slips, inner_bank)
+    end
+    function SlipItemBank(::BooleanResponse, slips, inner_bank)
+        new{typeof(inner_bank)}(slips, inner_bank)
+    end
 end
 y_offset(item_bank::SlipItemBank, item_idx) = item_bank.slips[item_idx]
 @forward SlipItemBank.inner_bank Base.length, domdims
-subset(item_bank::SlipItemBank, idxs) = FixedSlipItemBank(item_bank.slips[idxs], subset(item_bank.inner_bank, idxs))
+function subset(item_bank::SlipItemBank, idxs)
+    FixedSlipItemBank(item_bank.slips[idxs], subset(item_bank.inner_bank, idxs))
+end
 function item_params(item_bank::SlipItemBank, idx)
-    (;item_params(item_bank.inner_bank, idx)..., slip=item_bank.slips[idx])
+    (; item_params(item_bank.inner_bank, idx)..., slip = item_bank.slips[idx])
 end
 
 const AnySlipItemBank = Union{SlipItemBank, FixedSlipItemBank}
 const AnyGuessItemBank = Union{GuessItemBank, FixedGuessItemBank}
 const AnySlipOrGuessItemBank = Union{AnySlipItemBank, AnyGuessItemBank}
-const AnySlipAndGuessItemBank = Union{SlipItemBank{AnyGuessItemBank}, FixedSlipItemBank{AnyGuessItemBank}}
+const AnySlipAndGuessItemBank = Union{
+    SlipItemBank{AnyGuessItemBank}, FixedSlipItemBank{AnyGuessItemBank}}
 
 DomainType(item_bank::AnySlipOrGuessItemBank) = DomainType(item_bank.inner_bank)
 ResponseType(item_bank::AnySlipOrGuessItemBank) = ResponseType(item_bank.inner_bank)
-inner_item_response(ir::ItemResponse{<: AnySlipOrGuessItemBank}) = ItemResponse(ir.item_bank.inner_bank, ir.index)
+function inner_item_response(ir::ItemResponse{<:AnySlipOrGuessItemBank})
+    ItemResponse(ir.item_bank.inner_bank, ir.index)
+end
 
 # Ensure we always have Slip{Guess{ItemBank}}
 function FixedGuessItemBank(guess::Float64, inner_bank::AnySlipItemBank)

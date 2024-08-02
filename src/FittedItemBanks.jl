@@ -15,7 +15,8 @@ export BSplineItemBank
 
 export Smoother, KernelSmoother, NearestNeighborSmoother
 export PointsItemBank
-export DichotomousSmoothedItemBank, DichotomousPointsItemBank, MultiGridDichotomousPointsItemBank 
+export DichotomousSmoothedItemBank, DichotomousPointsItemBank,
+       MultiGridDichotomousPointsItemBank
 
 export domdims, ItemResponse, resp, resp_vec, responses, item_params
 
@@ -153,12 +154,12 @@ end
 Binary search for the point x where f(x) = target += precis given f is assumed as monotonically increasing.
 """
 function _search(
-    f::F,
-    lim_lower,
-    lim_upper,
-    target,
-    precis;
-    max_iters=50,
+        f::F,
+        lim_lower,
+        lim_upper,
+        target,
+        precis;
+        max_iters = 50
 ) where {F}
     lower = lim_lower
     upper = lim_upper
@@ -203,10 +204,10 @@ range (lo, hi) which includes for each item the range in which the the item
 response function is changing.
 """
 function item_bank_domain(
-    item_bank::AbstractItemBank;
-    zero_symmetric=false,
-    items=eachindex(item_bank),
-    thresh=nothing
+        item_bank::AbstractItemBank;
+        zero_symmetric = false,
+        items = eachindex(item_bank),
+        thresh = nothing
 )
     if length(item_bank) == 0
         (NaN, NaN)
@@ -236,7 +237,6 @@ function item_bank_domain(
         (cur_lo, cur_hi)
     end
 end
-
 
 include("./guess_slip_items.jl")
 include("./cdf_items.jl")

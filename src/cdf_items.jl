@@ -28,11 +28,13 @@ function _unnorm_abil_1d(θ, difficulty, discrimination)
 end
 
 function norm_abil(ir::ItemResponse{<:TransferItemBank}, θ)
-    _norm_abil_1d(θ, ir.item_bank.difficulties[ir.index], ir.item_bank.discriminations[ir.index])
+    _norm_abil_1d(
+        θ, ir.item_bank.difficulties[ir.index], ir.item_bank.discriminations[ir.index])
 end
 
 function unnorm_abil(ir::ItemResponse{<:TransferItemBank}, θ)
-    _unnorm_abil_1d(θ, ir.item_bank.difficulties[ir.index], ir.item_bank.discriminations[ir.index])
+    _unnorm_abil_1d(
+        θ, ir.item_bank.difficulties[ir.index], ir.item_bank.discriminations[ir.index])
 end
 
 function resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
@@ -47,7 +49,7 @@ function density_vec(ir::ItemResponse{<:TransferItemBank}, θ)
 end
 =#
 
-function item_domain(ir::ItemResponse, mass=1e-3)
+function item_domain(ir::ItemResponse, mass = 1e-3)
     item_domain(ir, mass, mass)
 end
 
@@ -87,5 +89,6 @@ function cresp(ir::ItemResponse{<:TransferItemBank}, θ)
 end
 
 function item_params(item_bank::TransferItemBank, idx)
-    (; difficulty=item_bank.difficulties[idx], discrimination=item_bank.discriminations[idx])
+    (; difficulty = item_bank.difficulties[idx],
+        discrimination = item_bank.discriminations[idx])
 end

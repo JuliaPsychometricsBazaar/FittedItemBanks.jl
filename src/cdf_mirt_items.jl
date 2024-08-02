@@ -13,9 +13,9 @@ struct CdfMirtItemBank{DistT <: ContinuousUnivariateDistribution} <: AbstractIte
     discriminations::Matrix{Float64}
 
     function CdfMirtItemBank(
-        distribution::DistT,
-        difficulties::Vector{Float64},
-        discriminations::Matrix{Float64},
+            distribution::DistT,
+            difficulties::Vector{Float64},
+            discriminations::Matrix{Float64}
     ) where {DistT <: ContinuousUnivariateDistribution}
         if size(discriminations, 2) != length(difficulties)
             error(
@@ -43,7 +43,8 @@ function _mirt_norm_abil(θ, difficulty, discrimination)
 end
 
 function norm_abil(ir::ItemResponse{<:CdfMirtItemBank}, θ)
-    _mirt_norm_abil(θ, ir.item_bank.difficulties[ir.index], @view ir.item_bank.discriminations[:, ir.index])
+    _mirt_norm_abil(θ, ir.item_bank.difficulties[ir.index],
+        @view ir.item_bank.discriminations[:, ir.index])
 end
 
 function resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
@@ -68,5 +69,6 @@ function cresp(ir::ItemResponse{<:CdfMirtItemBank}, θ)
 end
 
 function item_params(item_bank::CdfMirtItemBank, idx)
-    (; difficulty=item_bank.difficulties[idx], discrimination=@view item_bank.discriminations[:, idx])
+    (; difficulty = item_bank.difficulties[idx],
+        discrimination = @view item_bank.discriminations[:, idx])
 end

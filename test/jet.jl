@@ -1,7 +1,6 @@
 using JET
 using FittedItemBanks
 
-
 @testset "JET checks" begin
     rep = report_package(
         FittedItemBanks;
