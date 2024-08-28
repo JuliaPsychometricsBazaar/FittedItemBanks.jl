@@ -180,3 +180,9 @@ function resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, response, θ)
         resp(ItemResponse(ir.item_bank.inner_bank, ir.index), response, θ)
     )
 end
+
+function log_resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, response, θ)
+    log(resp(ir, response, θ))
+end
+log_resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, θ) = log(resp(ir, θ))
+log_resp_vec(ir::ItemResponse{<:AnySlipAndGuessItemBank}, θ) = log.(resp_vec(ir, θ))
