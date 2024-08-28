@@ -8,7 +8,7 @@ import ..SimpleItemBankSpec, ..StdModelForm, ..StdModel2PL, ..StdModel3PL, ..Std
 import ..OneDimContinuousDomain, ..VectorContinuousDomain, ..BooleanResponse,
        ..MultinomialResponse, ..ItemBank
 import ..GuessItemBank, ..SlipItemBank
-import ..ItemResponse
+import ..ItemResponse, ..resp
 
 export dummy_item_bank, dummy_full
 
@@ -117,7 +117,8 @@ function mirt_item_bank_to_full_dummy(rng, item_bank, num_testees, dims; squeeze
             else
                 ability = abilities[:, testee_idx]
             end
-            irs[question_idx, testee_idx] = ItemResponse(item_bank, question_idx)(ability)
+            irs[question_idx, testee_idx] = resp(
+                ItemResponse(item_bank, question_idx), ability)
         end
     end
     responses = rand(rng, num_questions, num_testees) .< irs
