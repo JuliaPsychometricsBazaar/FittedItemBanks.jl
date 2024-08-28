@@ -92,7 +92,7 @@ const AnySlipItemBank = Union{SlipItemBank, FixedSlipItemBank}
 const AnyGuessItemBank = Union{GuessItemBank, FixedGuessItemBank}
 const AnySlipOrGuessItemBank = Union{AnySlipItemBank, AnyGuessItemBank}
 const AnySlipAndGuessItemBank = Union{
-    SlipItemBank{AnyGuessItemBank}, FixedSlipItemBank{AnyGuessItemBank}}
+    SlipItemBank{<:AnyGuessItemBank}, FixedSlipItemBank{<:AnyGuessItemBank}}
 
 DomainType(item_bank::AnySlipOrGuessItemBank) = DomainType(item_bank.inner_bank)
 ResponseType(item_bank::AnySlipOrGuessItemBank) = ResponseType(item_bank.inner_bank)
@@ -165,11 +165,11 @@ function minabilresp(ir::ItemResponse{<:AnySlipOrGuessItemBank})
 end
 
 # XXX: Not getting dispatched to
-function (ir::ItemResponse{<:AnySlipAndGuessItemBank})(θ)
+function resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, θ)
     transform_irf_y(
         y_offset(ir.item_bank.inner_bank, ir.index),
         y_offset(ir.item_bank, ir.index),
-        ItemResponse(ir.item_bank.inner_bank.inner_bank, ir.index)(θ)
+        resp(ItemResponse(ir.item_bank.inner_bank.inner_bank, ir.index), θ)
     )
 end
 
