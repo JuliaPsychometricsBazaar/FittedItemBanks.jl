@@ -69,6 +69,11 @@ function num_response_categories(ir::ItemResponse{<:NominalItemBank})
     length(ir.item_bank.cut_points[ir.index])
 end
 
+function resp(ir::ItemResponse{<:NominalItemBank}, resp, θ)
+    outs = exp.(resp_logdensity_vec(ir, θ))
+    outs[resp] ./ sum(outs)
+end
+
 function resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
     outs = exp.(resp_logdensity_vec(ir, θ))
     outs ./ sum(outs)
