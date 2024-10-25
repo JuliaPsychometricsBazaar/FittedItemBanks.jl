@@ -131,3 +131,19 @@ end
 function ItemBank(spec::SimpleItemBankSpec, args...; kwargs...)
     constructor(spec)(args...; kwargs...)
 end
+
+@resumable function iterate_simple_item_bank_specs()
+    for model in [StdModel2PL(), StdModel3PL(), StdModel4PL()]
+        for domain in [VectorContinuousDomain(), OneDimContinuousDomain()]
+            #responses::Vector{ResponseType} = [BooleanResponse()]
+            responses = ResponseType[BooleanResponse()]
+            if model isa StdModel2PL
+                push!(responses, MultinomialResponse())
+            end
+            for response in responses
+                spec = SimpleItemBankSpec(model, domain, response)
+                @yield spec
+            end
+        end
+    end
+end
