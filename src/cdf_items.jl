@@ -92,3 +92,23 @@ function item_params(item_bank::TransferItemBank, idx)
     (; difficulty = item_bank.difficulties[idx],
         discrimination = item_bank.discriminations[idx])
 end
+
+function spec_description(item_bank::TransferItemBank, level)
+    if item_bank.distribution == normal_scaled_logistic
+        if level == :long
+            return "Two parameter unidimensional item bank with normal scaled logistic distribution"
+        elseif level == :short
+            return "2PL"
+        else
+            return "2pl"
+        end
+    else
+        if level == :long
+            return "Two parameter unidimensional item bank with unknown transfer function"
+        elseif level == :short
+            return "2P"
+        else
+            return "2p"
+        end
+    end
+end

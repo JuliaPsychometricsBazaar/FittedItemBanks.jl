@@ -20,6 +20,8 @@ export DichotomousSmoothedItemBank, DichotomousPointsItemBank,
 
 export domdims, ItemResponse, resp, resp_vec, responses, item_params
 
+export spec_description_slug, spec_description_short, spec_description_long
+
 export DomainType, DiscreteDomain, ContinuousDomain, VectorContinuousDomain
 export OneDimContinuousDomain, DiscreteIndexableDomain, DiscreteIterableDomain
 
@@ -148,6 +150,18 @@ end
 
 function responses(::MultinomialResponse, ir::ItemResponse)
     1:num_response_categories(ir)
+end
+
+function spec_description_short(val)
+    spec_description(val, :short)
+end
+
+function spec_description_long(val)
+    spec_description(val, :long)
+end
+
+function spec_description_slug(val)
+    spec_description(val, :slug)
 end
 
 """

@@ -72,3 +72,24 @@ function item_params(item_bank::CdfMirtItemBank, idx)
     (; difficulty = item_bank.difficulties[idx],
         discrimination = @view item_bank.discriminations[:, idx])
 end
+
+function spec_description(item_bank::CdfMirtItemBank, level)
+    dim = length(item_bank.difficulties)
+    if item_bank.distribution == normal_scaled_logistic
+        if level == :long
+            return "Two parameter $(dim)-dimensional multidimensional item bank with normal scaled logistic distribution"
+        elseif level == :short
+            return "2PL MIRT $(dim)d"
+        else
+            return "2pl_mirt_$(dim)d"
+        end
+    else
+        if level == :long
+            return "Two parameter $(dim)-dimensional multidimensional item bank with unknown transfer function"
+        elseif level == :short
+            return "2P MIRT $(dim)d"
+        else
+            return "2p_mirt_$(dim)d"
+        end
+    end
+end

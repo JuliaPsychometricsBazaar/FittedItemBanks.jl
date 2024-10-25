@@ -150,3 +150,44 @@ end
         end
     end
 end
+
+function spec_description(spec::SimpleItemBankSpec, level)
+    if spec.response isa MultinomialResponse
+        if spec.domain isa OneDimContinuousDomain
+            if level == :long
+                return "Generalized partial credit model"
+            elseif level == :short
+                return "GPCM"
+            else
+                return "gpcm"
+            end
+        else
+            if level == :long
+                return "Generalized partial credit model with multidimensional latent trait"
+            elseif level == :short
+                return "GPCM MIRT"
+            else
+                return "gpcm_mirt"
+            end
+        end
+    else
+        ppi = params_per_item(spec.model)
+        if spec.domain isa OneDimContinuousDomain
+            if level == :long
+                return "$ppi parameter item bank with normal scaled logistic distribution"
+            elseif level == :short
+                return "$(ppi)PL $(dim)d"
+            else
+                return "$(ppi)pl_$(dim)d"
+            end
+        else
+            if level == :long
+                return "$ppi parameter multidimensional item bank with normal scaled logistic distribution"
+            elseif level == :short
+                return "$(ppi)PL MIRT $(dim)d"
+            else
+                return "$(ppi)pl_mirt_$(dim)d"
+            end
+        end
+    end
+end
