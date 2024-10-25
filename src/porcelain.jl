@@ -91,6 +91,9 @@ abstract type StdModelForm end
 struct StdModel2PL <: StdModelForm end
 struct StdModel3PL <: StdModelForm end
 struct StdModel4PL <: StdModelForm end
+params_per_item(::StdModel2PL) = 2
+params_per_item(::StdModel3PL) = 3
+params_per_item(::StdModel4PL) = 4
 
 struct SimpleItemBankSpec{
     StdModelT <: StdModelForm, DomainTypeT <: DomainType, ResponseTypeT <: ResponseType}
