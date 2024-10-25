@@ -1,26 +1,3 @@
-module DummyData
-
-using Distributions: Normal, MvNormal, Zeros, ScalMat
-using Random
-using ArraysOfArrays: VectorOfArrays
-
-import ..SimpleItemBankSpec, ..StdModelForm, ..StdModel2PL, ..StdModel3PL, ..StdModel4PL
-import ..OneDimContinuousDomain, ..VectorContinuousDomain, ..BooleanResponse,
-       ..MultinomialResponse, ..ItemBank
-import ..GuessItemBank, ..SlipItemBank
-import ..ItemResponse, ..resp
-
-export dummy_item_bank, dummy_full
-
-const default_num_questions = 8000
-const default_num_testees = 30
-const std_normal = Normal()
-
-std_mv_normal(dim) = MvNormal(Zeros(dim), ScalMat(dim, 1.0))
-
-abs_rand(rng, dist, dims...) = abs.(rand(rng, dist, dims...) .- 0.1) .+ 0.1
-clamp_rand(rng, dist, dims...) = clamp.(rand(rng, dist, dims...), 0.0, 0.4)
-
 dummy_difficulties(rng, num_questions) = rand(rng, std_normal, num_questions)
 dummy_discriminations(rng, num_questions) = abs_rand(rng, Normal(1.0, 0.2), num_questions)
 function dummy_discriminations(rng, dims, num_questions)
@@ -142,6 +119,4 @@ end
 
 function dummy_full(spec::SimpleItemBankSpec, args...; kwargs...)
     dummy_full(Random.default_rng(), spec, args...; kwargs...)
-end
-
 end

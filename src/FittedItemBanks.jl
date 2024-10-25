@@ -246,6 +246,6 @@ include("./bspline.jl")
 include("./sampled_items.jl")
 include("./nominal_items.jl")
 include("./porcelain.jl")
-include("./DummyData.jl")
+include("./DummyData/DummyData.jl")
 
 end
