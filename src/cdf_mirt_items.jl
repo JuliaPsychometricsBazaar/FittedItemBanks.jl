@@ -52,6 +52,70 @@ function resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
+function item_domain(ir::ItemResponse{<:CdfMirtItemBank}, reference_point, mass = 1e-3)
+    item_domain(ir, reference_point, mass, mass)
+end
+
+#=
+function item_domain(ir::ItemResponse{<:CdfMirtItemBank}, reference_point, left_mass, right_mass)
+    ndims = domdims(ir.item_bank)
+    z_lo = quantile(ir.item_bank.distribution, left_mass)
+    z_hi = quantile(ir.item_bank.distribution, 1.0 - right_mass)
+    lo = fill(Inf, ndims)
+    hi = fill(-Inf, ndims)
+    difficulty = ir.item_bank.difficulties[ir.index]
+    discrimination = @view ir.item_bank.discriminations[:, ir.index]
+    diff_disc = sum(difficulty .* discrimination)
+    function add_unnormed(z, i)
+        # The dot of discrimination and reference point excluding the i-th element
+        ref_disc_rest = sum((rp * d for (j, rp, d) in zip(1:length(reference_point), reference_point, discrimination) if j != i))
+        @info "add_unnormed" z i diff_disc ref_disc_rest discrimination[i]
+        unnormed = (z + diff_disc - ref_disc_rest) / discrimination[i]
+        if unnormed < lo[i]
+            lo[i] = unnormed
+        end
+        if unnormed > hi[i]
+            hi[i] = unnormed
+        end
+    end
+    for i in 1:ndims
+        add_unnormed(z_lo, i)
+        add_unnormed(z_hi, i)
+    end
+    return (lo, hi)
+end
+=#
+
+function item_domain(
+        ir::ItemResponse{<:CdfMirtItemBank}, reference_point, left_mass, right_mass)
+    ndims = domdims(ir.item_bank)
+    z_lo = quantile(ir.item_bank.distribution, left_mass)
+    z_hi = quantile(ir.item_bank.distribution, 1.0 - right_mass)
+    lo = fill(Inf, ndims)
+    hi = fill(-Inf, ndims)
+    difficulty = ir.item_bank.difficulties[ir.index]
+    discrimination = @view ir.item_bank.discriminations[:, ir.index]
+    diff_disc = sum(difficulty .* discrimination)
+    function nearest_point(z)
+        c = z + diff_disc
+        t = (c - dot(reference_point, discrimination)) / sum(discrimination .^ 2)
+        return reference_point .+ t .* discrimination
+    end
+    function update_bounds!(point)
+        for i in 1:ndims
+            if point[i] < lo[i]
+                lo[i] = point[i]
+            end
+            if point[i] > hi[i]
+                hi[i] = point[i]
+            end
+        end
+    end
+    update_bounds!(nearest_point(z_lo))
+    update_bounds!(nearest_point(z_hi))
+    return (lo, hi)
+end
+
 function resp(ir::ItemResponse{<:CdfMirtItemBank}, outcome::Bool, θ)
     if outcome
         resp(ir, θ)

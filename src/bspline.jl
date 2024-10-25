@@ -37,6 +37,14 @@ function resp_vec(ir::ItemResponse{<:BSplineItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
+function item_domain(ir::ItemResponse{<:BSplineItemBank}, left_mass, right_mass)
+    # TODO: Default to this for now; should take into account the left/right mass
+    return (
+        ir.item_bank.bases[ir.index].knots[1],
+        ir.item_bank.bases[ir.index].knots[end]
+    )
+end
+
 function resp(ir::ItemResponse{<:BSplineItemBank}, outcome::Bool, θ)
     r = resp(ir, θ)
     if outcome

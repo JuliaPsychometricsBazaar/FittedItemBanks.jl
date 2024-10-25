@@ -42,6 +42,7 @@ using BSplines
 using BSplines: NoDerivative, bsplines_destarray, _bsplines!, bsplines_offsetarray
 using LogExpFunctions
 using ResumableFunctions
+using Polynomials
 
 abstract type AbstractItemBank end
 
@@ -224,6 +225,22 @@ function item_bank_domain(
         items = eachindex(item_bank),
         thresh = nothing
 )
+    return item_bank_domain(
+        DomainType(item_bank),
+        item_bank;
+        zero_symmetric = zero_symmetric,
+        items = items,
+        thresh = thresh
+    )
+end
+
+function item_bank_domain(
+        ::OneDimContinuousDomain,
+        item_bank::AbstractItemBank;
+        zero_symmetric = false,
+        items = eachindex(item_bank),
+        thresh = nothing
+)
     if length(item_bank) == 0
         (NaN, NaN)
     end
@@ -247,6 +264,45 @@ function item_bank_domain(
     end
     if zero_symmetric
         dist = max(abs(cur_lo), abs(cur_hi))
+        (-dist, dist)
+    else
+        (cur_lo, cur_hi)
+    end
+end
+
+function item_bank_domain(
+        ::VectorContinuousDomain,
+        item_bank::AbstractItemBank;
+        zero_symmetric = false,
+        items = eachindex(item_bank),
+        thresh = nothing,
+        reference_point = nothing
+)
+    ndims = domdims(item_bank)
+    if reference_point === nothing
+        reference_point = zeros(ndims)
+    end
+    cur_lo = fill(Inf, ndims)
+    cur_hi = fill(-Inf, ndims)
+    for item_idx in items
+        ir = ItemResponse(item_bank, item_idx)
+        if thresh === nothing
+            item_lo, item_hi = item_domain(ir, reference_point)
+        else
+            item_lo, item_hi = item_domain(ir, reference_point, thresh)
+        end
+        @info "lo/hi" item_lo item_hi cur_lo cur_hi
+        for idx in 1:ndims
+            if item_lo[idx] < cur_lo[idx]
+                cur_lo[idx] = item_lo[idx]
+            end
+            if item_hi[idx] > cur_hi[idx]
+                cur_hi[idx] = item_hi[idx]
+            end
+        end
+    end
+    if zero_symmetric
+        dist = max.(abs.(cur_lo), abs.(cur_hi))
         (-dist, dist)
     else
         (cur_lo, cur_hi)
