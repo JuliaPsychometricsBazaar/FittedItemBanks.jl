@@ -52,12 +52,12 @@ function resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
-function item_domain(ir::ItemResponse{<:CdfMirtItemBank}, reference_point, mass = 1e-3)
+#=function item_domain(ir::ItemResponse{<:CdfMirtItemBank}; reference_point, mass = 1e-3)
     item_domain(ir, reference_point, mass, mass)
-end
+end=#
 
 #=
-function item_domain(ir::ItemResponse{<:CdfMirtItemBank}, reference_point, left_mass, right_mass)
+function item_domain(ir::ItemResponse{<:CdfMirtItemBank}; reference_point, left_mass, right_mass)
     ndims = domdims(ir.item_bank)
     z_lo = quantile(ir.item_bank.distribution, left_mass)
     z_hi = quantile(ir.item_bank.distribution, 1.0 - right_mass)
@@ -87,7 +87,7 @@ end
 =#
 
 function item_domain(
-        ir::ItemResponse{<:CdfMirtItemBank}, reference_point, left_mass, right_mass)
+        ir::ItemResponse{<:CdfMirtItemBank}; reference_point, left_mass = default_mass, right_mass = default_mass)
     ndims = domdims(ir.item_bank)
     z_lo = quantile(ir.item_bank.distribution, left_mass)
     z_hi = quantile(ir.item_bank.distribution, 1.0 - right_mass)

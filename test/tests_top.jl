@@ -8,8 +8,8 @@ end
     include("./jet.jl")
 end
 
-@testset "smoke" begin
-    include("./smoke.jl")
+@testset "basic" begin
+    include("./basic.jl")
 end
 
 @testset "format" begin

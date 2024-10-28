@@ -18,7 +18,8 @@ export PointsItemBank
 export DichotomousSmoothedItemBank, DichotomousPointsItemBank,
        MultiGridDichotomousPointsItemBank
 
-export domdims, ItemResponse, resp, resp_vec, responses, item_params
+export domdims, item_bank_domain
+export ItemResponse, resp, resp_vec, responses, item_params
 
 export spec_description_slug, spec_description_short, spec_description_long
 
@@ -43,6 +44,8 @@ using BSplines: NoDerivative, bsplines_destarray, _bsplines!, bsplines_offsetarr
 using LogExpFunctions
 using ResumableFunctions
 using Polynomials
+
+const default_mass = 1e-2
 
 abstract type AbstractItemBank end
 
@@ -251,7 +254,7 @@ function item_bank_domain(
         if thresh === nothing
             item_lo, item_hi = item_domain(ir)
         else
-            item_lo, item_hi = item_domain(ir, thresh)
+            item_lo, item_hi = item_domain(ir; mass = thresh)
         end
         if item_lo < cur_lo
             cur_lo = item_lo
@@ -287,11 +290,11 @@ function item_bank_domain(
     for item_idx in items
         ir = ItemResponse(item_bank, item_idx)
         if thresh === nothing
-            item_lo, item_hi = item_domain(ir, reference_point)
+            item_lo, item_hi = item_domain(ir; reference_point = reference_point)
         else
-            item_lo, item_hi = item_domain(ir, reference_point, thresh)
+            item_lo, item_hi = item_domain(
+                ir; reference_point = reference_point, mass = thresh)
         end
-        @info "lo/hi" item_lo item_hi cur_lo cur_hi
         for idx in 1:ndims
             if item_lo[idx] < cur_lo[idx]
                 cur_lo[idx] = item_lo[idx]

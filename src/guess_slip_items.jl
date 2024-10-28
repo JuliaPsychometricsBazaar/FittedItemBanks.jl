@@ -150,8 +150,8 @@ function resp_vec(ir::ItemResponse{<:AnySlipOrGuessItemBank}, θ)
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
 
-function item_domain(ir::ItemResponse{<:AnySlipOrGuessItemBank}, left_mass, right_mass)
-    item_domain(inner_item_response(ir), left_mass, right_mass)
+function item_domain(ir::ItemResponse{<:AnySlipOrGuessItemBank}; kwargs...)
+    item_domain(inner_item_response(ir); kwargs...)
 end
 
 function maxabilresp(ir::ItemResponse{<:AnySlipOrGuessItemBank})

@@ -49,11 +49,12 @@ function density_vec(ir::ItemResponse{<:TransferItemBank}, θ)
 end
 =#
 
-function item_domain(ir::ItemResponse, mass = 1e-3)
+#=function item_domain(ir::ItemResponse, mass = 1e-3)
     item_domain(ir, mass, mass)
-end
+end=#
 
-function item_domain(ir::ItemResponse{<:TransferItemBank}, left_mass, right_mass)
+function item_domain(ir::ItemResponse{<:TransferItemBank};
+        left_mass = default_mass, right_mass = default_mass)
     (
         unnorm_abil(ir, quantile(ir.item_bank.distribution, left_mass)),
         unnorm_abil(ir, quantile(ir.item_bank.distribution, 1.0 - right_mass))

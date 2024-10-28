@@ -79,6 +79,20 @@ function resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
     outs ./ sum(outs)
 end
 
+# TODO
+function item_domain(ir::ItemResponse{<:NominalItemBank}; reference_point,
+        left_mass = default_mass, right_mass = default_mass)
+    error("Not implemented")
+    #=
+    TODO:
+    z = (k(a \dot θ + d)
+    z_i - logsumexp z = log 0.99
+    Hopefully a hyperplan in \theta
+    Find closest point to reference_point
+    Try for each category i
+    =#
+end
+
 function num_ranks(ir::ItemResponse{<:NominalItemBank})
     length(ir.item_bank.ranks[ir.index])
 end
