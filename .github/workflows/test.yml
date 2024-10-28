@@ -36,6 +36,7 @@ jobs:
       - name: Set resolve env
         run: |
           julia --project=test/ -e 'using Pkg;
+                                    Pkg.Registry.update();
                                     Pkg.resolve();
                                     Pkg.instantiate()'
       - name: Run tests
