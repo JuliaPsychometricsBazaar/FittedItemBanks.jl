@@ -59,14 +59,14 @@ function test_domain(item_bank; bound = 10)
     test_bounds(domain[1], domain[2], bound)
 end
 
-@testcase "SimpleItemBankSpec constructable item banks" begin
-    for spec in iterate_simple_item_bank_specs()
-        item_bank = dummy(spec)
+for spec in iterate_simple_item_bank_specs()
+    desc = spec_description_short(spec)
+    item_bank = dummy(spec)
+    @testcase "$desc" begin
         test_item_bank(item_bank)
-        if item_bank isa NominalItemBank
-            continue # TODO
+        if !(item_bank isa NominalItemBank) # TODO
+            test_domain(item_bank)
         end
-        test_domain(item_bank)
     end
 end
 
