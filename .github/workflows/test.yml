@@ -18,9 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.8'
-          - '1.9'
-          - 'nightly'
+          - '1.10'
+          - '1.11'
         os:
           - ubuntu-latest
         arch:
@@ -32,15 +31,8 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v1
-      - name: Set resolve env
-        run: |
-          julia --project=test/ -e 'using Pkg;
-                                    Pkg.develop([
-                                      PackageSpec(url="https://github.com/JuliaPsychometricsBazaar/PsychometricsBazaarBase.jl.git"),
-                                      PackageSpec(path=pwd())
-                                    ]);
-                                    Pkg.resolve();
-                                    Pkg.instantiate()'
+      - uses: julia-actions/julia-downgrade-compat@v1
+        if: ${{ matrix.version == '1.10' }}
       - name: Run tests
         run: |
           cd test && julia --project=. ./runtests.jl
