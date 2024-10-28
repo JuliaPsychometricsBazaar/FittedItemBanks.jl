@@ -37,6 +37,7 @@ jobs:
         run: |
           julia --project=test/ -e 'using Pkg;
                                     Pkg.Registry.update();
+                                    Pkg.develop(path=".");
                                     Pkg.resolve();
                                     Pkg.instantiate()'
       - name: Run tests
