@@ -14,7 +14,7 @@ dichotomous responses.
 """
 struct BSplineItemBank <: AbstractItemBank
     bases::Vector{BSplineBasis{Vector{Float64}}}
-    params::VectorOfVectors{Float64}
+    params::VectorOfVectorsFloat64
 end
 
 DomainType(::BSplineItemBank) = OneDimContinuousDomain()

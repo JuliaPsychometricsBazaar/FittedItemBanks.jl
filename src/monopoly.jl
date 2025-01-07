@@ -44,9 +44,9 @@ This item bank implements the monotonic polynomial model with dichotomous respon
    ](https://doi.org/10.1007/s11336-014-9428-7)
 """
 struct MonopolyItemBank <: AbstractItemBank
-    as::VectorOfVectors{Float64}
+    as::VectorOfVectorsFloat64
     xis::Vector{Float64}
-    bs::VectorOfVectors{Float64}
+    bs::VectorOfVectorsFloat64
 end
 
 DomainType(::MonopolyItemBank) = OneDimContinuousDomain()

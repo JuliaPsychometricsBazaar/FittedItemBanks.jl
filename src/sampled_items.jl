@@ -68,8 +68,8 @@ in `ys`. In most cases this item banks will be coupled with a `Smoother` and wra
 a `DichotomousSmoothedItemBank`.
 """
 struct MultiGridDichotomousPointsItemBank <: PointsItemBank
-    xs::VectorOfVectors{Float64}
-    ys::VectorOfVectors{Float64}
+    xs::VectorOfVectorsFloat64
+    ys::VectorOfVectorsFloat64
 end
 
 DomainType(::MultiGridDichotomousPointsItemBank) = DiscreteIndexableDomain()
@@ -111,8 +111,8 @@ $(TYPEDFIELDS)
 A smoother that uses a kernel to smooth the IRF. The `bandwidths` field stores
 the kernel bandwidth for each item.
 """
-struct KernelSmoother <: Smoother
-    kernel::Function
+struct KernelSmoother{FunctionT} <: Smoother
+    kernel::FunctionT
     bandwidths::Vector{Float64}
 end
 
