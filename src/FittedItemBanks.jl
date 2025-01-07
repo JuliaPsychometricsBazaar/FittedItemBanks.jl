@@ -20,6 +20,7 @@ export DichotomousSmoothedItemBank, DichotomousPointsItemBank,
 
 export domdims, item_bank_domain
 export ItemResponse, resp, resp_vec, responses, item_params
+export num_response_categories
 
 export spec_description_slug, spec_description_short, spec_description_long
 
