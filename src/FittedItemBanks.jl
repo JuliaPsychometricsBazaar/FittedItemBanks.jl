@@ -17,6 +17,7 @@ export Smoother, KernelSmoother, NearestNeighborSmoother
 export PointsItemBank
 export DichotomousSmoothedItemBank, DichotomousPointsItemBank,
        MultiGridDichotomousPointsItemBank
+export OneDimensionItemBankAdapter
 
 export domdims, item_bank_domain
 export ItemResponse, resp, resp_vec, responses, item_params
@@ -313,6 +314,7 @@ function item_bank_domain(
     end
 end
 
+include("./adapter.jl")
 include("./guess_slip_items.jl")
 include("./cdf_items.jl")
 include("./cdf_mirt_items.jl")
