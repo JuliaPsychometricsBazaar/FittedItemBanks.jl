@@ -40,6 +40,9 @@ function NominalItemBank(ranks, discriminations::Vector{Float64}, cut_points)
 end
 
 function GPCMItemBank(discriminations, cut_points::PerCategoryFloat)
+    if length(discriminations) != length(cut_points)
+        error("Number of cut points must match number of discriminations")
+    end
     NominalItemBank(
         # XXX: Could probably be more efficient by making this lazy somehow
         [1:length(item_cut_points) for item_cut_points in cut_points],
