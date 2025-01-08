@@ -127,8 +127,12 @@ function constructor(::SimpleItemBankSpec{
     ItemBankMirt4PL
 end
 function constructor(::SimpleItemBankSpec{
-        StdModel2PL, D, MultinomialResponse}) where {D <: ContinuousDomain}
+        StdModel2PL, VectorContinuousDomain, MultinomialResponse})
     ItemBankGPCM
+end
+function constructor(::SimpleItemBankSpec{
+        StdModel2PL, OneDimContinuousDomain, MultinomialResponse})
+    (args...; kwargs...) -> OneDimensionItemBankAdapter(ItemBankGPCM(args...; kwargs...))
 end
 
 function ItemBank(spec::SimpleItemBankSpec, args...; kwargs...)
