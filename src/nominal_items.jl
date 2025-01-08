@@ -28,6 +28,21 @@ struct NominalItemBank{RankStorageT <: PerRankReal, CategoryStorageT <: PerCateg
     ranks::RankStorageT # ak_1 ... ak_k
     discriminations::Matrix{Float64} # a_1 ... a_n
     cut_points::CategoryStorageT # d_1 ... d_k
+
+    function NominalItemBank(ranks, discriminations, cut_points)
+        if length(ranks) != length(cut_points)
+            error(
+                "Number of ranks should match number of cut points"
+            )
+        end
+        if size(discriminations, 2) != length(cut_points)
+            error(
+                "Number of cut points " *
+                "should match number of item in 2nd dimension of discriminations"
+            )
+        end
+        new{typeof(ranks), typeof(cut_points)}(ranks, discriminations, cut_points)
+    end
 end
 
 function NominalItemBank(ranks::Matrix{Float64}, discriminations::Matrix{Float64},
@@ -40,9 +55,6 @@ function NominalItemBank(ranks, discriminations::Vector{Float64}, cut_points)
 end
 
 function GPCMItemBank(discriminations, cut_points::PerCategoryFloat)
-    if length(discriminations) != length(cut_points)
-        error("Number of cut points must match number of discriminations")
-    end
     NominalItemBank(
         # XXX: Could probably be more efficient by making this lazy somehow
         [1:length(item_cut_points) for item_cut_points in cut_points],
