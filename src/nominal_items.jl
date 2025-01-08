@@ -123,5 +123,5 @@ function log_resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
 end
 
 function item_params(item_bank::NominalItemBank, idx)
-    (; discrimination = item_bank.discriminations[idx, :])
+    (; discrimination = @view item_bank.discriminations[:, idx])
 end
