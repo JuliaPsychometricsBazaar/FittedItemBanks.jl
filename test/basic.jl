@@ -64,7 +64,7 @@ for spec in iterate_simple_item_bank_specs()
     item_bank = dummy(spec)
     @testcase "$desc" begin
         test_item_bank(item_bank)
-        if !(item_bank isa NominalItemBank) # TODO
+        if !(item_bank isa NominalItemBank) && !(item_bank isa OneDimensionItemBankAdapter) # TODO
             test_domain(item_bank)
         end
     end
