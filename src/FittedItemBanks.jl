@@ -314,7 +314,8 @@ function item_bank_domain(
     end
 end
 
-VectorOfVectorsFloat64 = VectorOfVectors{Float64, Vector{Float64}, Vector{Int64}, Vector{Tuple{}}}
+VectorOfVectorsFloat64 = VectorOfVectors{
+    Float64, Vector{Float64}, Vector{Int64}, Vector{Tuple{}}}
 
 include("./adapter.jl")
 include("./guess_slip_items.jl")

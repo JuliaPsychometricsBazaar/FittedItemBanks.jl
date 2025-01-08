@@ -1,6 +1,6 @@
 struct OneDimensionItemBankAdapter{ItemBankT <: AbstractItemBank} <: AbstractItemBank
     inner_bank::ItemBankT
-    
+
     function OneDimensionItemBankAdapter(inner)
         if DomainType(inner) != VectorContinuousDomain()
             error("Inner item bank must have a vector continuous domain")
