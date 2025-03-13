@@ -113,3 +113,5 @@ function spec_description(item_bank::TransferItemBank, level)
         end
     end
 end
+
+num_response_categories(ir::ItemResponse{<:TransferItemBank}) = 2
