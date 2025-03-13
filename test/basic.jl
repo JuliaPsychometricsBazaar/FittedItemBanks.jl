@@ -62,7 +62,7 @@ end
 for spec in iterate_simple_item_bank_specs()
     desc = spec_description_short(spec)
     item_bank = dummy(spec)
-    @testcase "$desc" begin
+    @testset "$desc" begin
         test_item_bank(item_bank)
         if !(item_bank isa NominalItemBank) && !(item_bank isa OneDimensionItemBankAdapter) # TODO
             test_domain(item_bank)
@@ -70,7 +70,7 @@ for spec in iterate_simple_item_bank_specs()
     end
 end
 
-@testcase "MonopolyItemBank" begin
+@testset "MonopolyItemBank" begin
     item_bank = dummy_item_bank(
         Random.default_rng(42),
         MonopolyItemBank,
@@ -81,7 +81,7 @@ end
     test_domain(item_bank)
 end
 
-@testcase "BSplineItemBank" begin
+@testset "BSplineItemBank" begin
     item_bank = dummy_item_bank(
         Random.default_rng(42),
         BSplineItemBank,
