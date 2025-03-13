@@ -62,7 +62,7 @@ end
 y_offset(item_bank::GuessItemBank, item_idx) = item_bank.guesses[item_idx]
 @forward GuessItemBank.inner_bank Base.length, domdims
 function subset(item_bank::GuessItemBank, idxs)
-    FixedSlipItemBank(item_bank.guesses[idxs], subset(item_bank.inner_bank, idxs))
+    GuessItemBank(item_bank.guesses[idxs], subset(item_bank.inner_bank, idxs))
 end
 function item_params(item_bank::GuessItemBank, idx)
     (; item_params(item_bank.inner_bank, idx)..., guess = item_bank.guesses[idx])
@@ -82,7 +82,7 @@ end
 y_offset(item_bank::SlipItemBank, item_idx) = item_bank.slips[item_idx]
 @forward SlipItemBank.inner_bank Base.length, domdims
 function subset(item_bank::SlipItemBank, idxs)
-    FixedSlipItemBank(item_bank.slips[idxs], subset(item_bank.inner_bank, idxs))
+    SlipItemBank(item_bank.slips[idxs], subset(item_bank.inner_bank, idxs))
 end
 function item_params(item_bank::SlipItemBank, idx)
     (; item_params(item_bank.inner_bank, idx)..., slip = item_bank.slips[idx])
