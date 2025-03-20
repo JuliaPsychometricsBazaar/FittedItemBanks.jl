@@ -33,13 +33,6 @@ jobs:
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-downgrade-compat@v1
         if: ${{ matrix.version == '1.10' }}
-      - name: Set resolve env
-        run: |
-          julia --project=test/ -e 'using Pkg;
-                                    Pkg.Registry.update();
-                                    Pkg.develop(path=".");
-                                    Pkg.resolve();
-                                    Pkg.instantiate()'
+      - uses: julia-actions/julia-buildpkg@v1
       - name: Run tests
-        run: |
-          cd test && julia --project=. ./runtests.jl
+        run: julia --project=. -e 'using Pkg; Pkg.test()'
