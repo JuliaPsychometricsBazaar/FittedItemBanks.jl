@@ -7,7 +7,7 @@ using Random
 using BSplines
 using FittedItemBanks
 using FittedItemBanks: SimpleItemBankSpec, iterate_simple_item_bank_specs, params_per_item,
-subset, minabilresp, maxabilresp
+                       subset, minabilresp, maxabilresp
 using FittedItemBanks.DummyData
 
 function dummy(spec::SimpleItemBankSpec{TA, OneDimContinuousDomain, TB}) where {TA, TB}
@@ -54,7 +54,8 @@ function test_bounds(lo, hi, bound)
     @test -bound < lo < 0 < hi < bound
 end
 
-function test_domain(item_bank; bound = 10, with_zero_symmetric = false, with_thresh = false)
+function test_domain(
+        item_bank; bound = 10, with_zero_symmetric = false, with_thresh = false)
     domain = item_bank_domain(item_bank)
     @test length(domain) == 2
     test_bounds(domain[1], domain[2], bound)
@@ -63,7 +64,8 @@ function test_domain(item_bank; bound = 10, with_zero_symmetric = false, with_th
         if with_thresh
             push!(thresh, :thresh => 0.2)
         end
-        domain = item_bank_domain(item_bank; zero_symmetric=with_zero_symmetric, thresh...)
+        domain = item_bank_domain(
+            item_bank; zero_symmetric = with_zero_symmetric, thresh...)
         @test length(domain) == 2
         test_bounds(domain[1], domain[2], bound)
     end
@@ -75,7 +77,8 @@ for spec in iterate_simple_item_bank_specs()
     @testset "$desc" begin
         test_item_bank(item_bank)
         if !(item_bank isa NominalItemBank) && !(item_bank isa OneDimensionItemBankAdapter) # TODO
-            test_domain(item_bank; with_zero_symmetric=true, with_thresh=params_per_item(spec.model) == 2)
+            test_domain(item_bank; with_zero_symmetric = true,
+                with_thresh = params_per_item(spec.model) == 2)
         end
         @test length(subset(item_bank, [1, 3])) == 2
         ir = ItemResponse(item_bank, 1)
@@ -88,8 +91,10 @@ for spec in iterate_simple_item_bank_specs()
         else
             @test 0 <= resp(ir, idx_arg..., fill(0.5, domdims(item_bank))) <= 1
         end
-        if spec.domain isa OneDimContinuousDomain && !(ir.item_bank isa OneDimensionItemBankAdapter)
-            @test length(minabilresp(ir)) == length(maxabilresp(ir)) == num_response_categories(ir)
+        if spec.domain isa OneDimContinuousDomain &&
+           !(ir.item_bank isa OneDimensionItemBankAdapter)
+            @test length(minabilresp(ir)) == length(maxabilresp(ir)) ==
+                  num_response_categories(ir)
         end
         ppi = params_per_item(spec.model)
         num_params = length(item_params(item_bank, 1))
