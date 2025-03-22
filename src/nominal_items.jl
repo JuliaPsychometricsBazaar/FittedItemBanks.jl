@@ -73,6 +73,14 @@ ResponseType(::NominalItemBank) = MultinomialResponse()
 Base.length(item_bank::NominalItemBank) = size(item_bank.discriminations, 2)
 domdims(item_bank::NominalItemBank) = size(item_bank.discriminations, 1)
 
+function subset(item_bank::NominalItemBank, idxs)
+    NominalItemBank(
+        item_bank.ranks[idxs],
+        item_bank.discriminations[:, idxs],
+        item_bank.cut_points[idxs]
+    )
+end
+
 function resp_logdensity_vec(ir::ItemResponse{<:NominalItemBank}, θ)
     aks = ir.item_bank.ranks[ir.index]
     as = @view ir.item_bank.discriminations[:, ir.index]
