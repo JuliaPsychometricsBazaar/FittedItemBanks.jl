@@ -99,6 +99,7 @@ ResponseType(item_bank::AnySlipOrGuessItemBank) = ResponseType(item_bank.inner_b
 function inner_item_response(ir::ItemResponse{<:AnySlipOrGuessItemBank})
     ItemResponse(ir.item_bank.inner_bank, ir.index)
 end
+num_response_categories(ir::ItemResponse{<:AnySlipOrGuessItemBank}) = 2
 
 # Ensure we always have Slip{Guess{ItemBank}}
 function FixedGuessItemBank(guess::Float64, inner_bank::AnySlipItemBank)
