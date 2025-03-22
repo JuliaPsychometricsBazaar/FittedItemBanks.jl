@@ -34,6 +34,14 @@ function Base.length(item_bank::CdfMirtItemBank)
     length(item_bank.difficulties)
 end
 
+function subset(item_bank::CdfMirtItemBank, idxs)
+    CdfMirtItemBank(
+        item_bank.distribution,
+        item_bank.difficulties[idxs],
+        item_bank.discriminations[:, idxs]
+    )
+end
+
 function domdims(item_bank::CdfMirtItemBank)
     size(item_bank.discriminations, 1)
 end

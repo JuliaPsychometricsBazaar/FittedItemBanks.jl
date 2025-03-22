@@ -15,7 +15,7 @@ end
 
 DomainType(::OneDimensionItemBankAdapter) = OneDimContinuousDomain()
 
-@forward OneDimensionItemBankAdapter.inner_bank Base.length, subset, ResponseType
+@forward OneDimensionItemBankAdapter.inner_bank Base.length, ResponseType
 function subset(item_bank::OneDimensionItemBankAdapter, idxs)
     OneDimensionItemBankAdapter(subset(item_bank.inner_bank, idxs))
 end
