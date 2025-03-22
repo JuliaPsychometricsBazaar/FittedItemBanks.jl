@@ -62,7 +62,7 @@ function resp_vec(ir::ItemResponse{<:MonopolyItemBank}, θ)
 end
 
 function item_domain(ir::ItemResponse{<:MonopolyItemBank};
-        left_mass = default_mass, right_mass = default_mass)
+        mass = default_mass, left_mass = mass, right_mass = mass)
     right = 1.0 - right_mass
     logit(x) = log(x / (1.0 - x))
     function invert(target)

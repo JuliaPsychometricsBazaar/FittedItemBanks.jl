@@ -96,7 +96,7 @@ end
 
 # TODO
 function item_domain(ir::ItemResponse{<:NominalItemBank}; reference_point,
-        left_mass = default_mass, right_mass = default_mass)
+        mass = default_mass, left_mass = mass, right_mass = mass)
     error("Not implemented")
     #=
     TODO:

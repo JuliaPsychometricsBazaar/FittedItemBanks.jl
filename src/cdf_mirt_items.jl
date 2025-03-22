@@ -87,7 +87,7 @@ end
 =#
 
 function item_domain(
-        ir::ItemResponse{<:CdfMirtItemBank}; reference_point, left_mass = default_mass, right_mass = default_mass)
+        ir::ItemResponse{<:CdfMirtItemBank}; reference_point, mass = default_mass, left_mass = mass, right_mass = mass)
     ndims = domdims(ir.item_bank)
     z_lo = quantile(ir.item_bank.distribution, left_mass)
     z_hi = quantile(ir.item_bank.distribution, 1.0 - right_mass)

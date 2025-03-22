@@ -54,7 +54,7 @@ end
 end=#
 
 function item_domain(ir::ItemResponse{<:TransferItemBank};
-        left_mass = default_mass, right_mass = default_mass)
+        mass = default_mass, left_mass = mass, right_mass = mass)
     (
         unnorm_abil(ir, quantile(ir.item_bank.distribution, left_mass)),
         unnorm_abil(ir, quantile(ir.item_bank.distribution, 1.0 - right_mass))
