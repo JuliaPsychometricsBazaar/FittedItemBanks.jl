@@ -39,7 +39,7 @@ Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 CheckConcreteStructs = "73c92db5-9da6-4938-911a-6443a7e94a58"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
-XUnit = "3e3c03f2-1a94-11e9-2981-050a4ca824ab"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "CheckConcreteStructs", "JET", "JuliaFormatter", "XUnit"]
+test = ["Aqua", "CheckConcreteStructs", "JET", "JuliaFormatter", "Test"]
