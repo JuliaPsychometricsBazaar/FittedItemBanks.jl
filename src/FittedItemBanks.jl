@@ -327,5 +327,6 @@ include("./sampled_items.jl")
 include("./nominal_items.jl")
 include("./porcelain.jl")
 include("./DummyData/DummyData.jl")
+include("./precompiles.jl")
 
 end
