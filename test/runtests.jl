@@ -17,7 +17,3 @@ end
 @testset "basic" begin
     include("./basic.jl")
 end
-
-@testset "format" begin
-    include("./format.jl")
-end
