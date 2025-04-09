@@ -4,24 +4,25 @@ PerRankReal = AbstractArray{<:AbstractArray{<:Real}, 1}
 PerCategoryFloat = AbstractArray{<:AbstractArray{Float64}, 1}
 
 """
-$(TYPEDEF)
+```julia
+struct $(FUNCTIONNAME) <: AbstractItemBank
+$(FUNCTIONNAME)(ranks, discriminations, cut_points) -> $(FUNCTIONNAME)
+```
 
-This item bank implements the nominal model. The Graded Partial Credit Model
-(GPCM) is implemented in terms of this one.
+This item bank implements the nominal model. [The Graded Partial Credit Model
+(GPCM) is implemented in terms of this](@ref GPCMItemBank).
 
 Currently, this item bank only supports the normal scaled logistic as the
 characteristic/transfer function.
 
+See also: [GPCMItemBank](@ref) (psuedo-constructor)
+
 ### References:
 
- * [*A Generalized Partial Credit Model: Application of an EM Algorithm*,
-    Muraki, E., (1992).
-    Applied Psychological Measurement.
-   ](https://doi.org/10.1177/014662169201600206)
- * [*A Generalized Partial Credit Model*,
-    Muraki, E. (1997).
-    In Handbook of Modern Item Response Theory.
-   ](https://doi.org/10.1007/978-1-4757-2691-6_9)
+ * [*Estimating item parameters and latent ability when responses are scored in two or more nominal categories*,
+    Bock, D. R., (1972).
+    Psychometrika.
+   ](https://doi.org/10.1007/BF02291411)
 """
 struct NominalItemBank{RankStorageT <: PerRankReal, CategoryStorageT <: PerCategoryFloat} <:
        AbstractItemBank
@@ -54,6 +55,25 @@ function NominalItemBank(ranks, discriminations::Vector{Float64}, cut_points)
     NominalItemBank(ranks, reshape(discriminations, 1, :), cut_points)
 end
 
+"""
+```julia
+$(FUNCTIONNAME)(discriminations, cut_points) -> NominalItemBank
+```
+
+This psuedo-constructor creates a [NominalItemBank](@ref) implementing the Graded
+Partial Credit Model (GPCM).
+
+### References:
+
+ * [*A Generalized Partial Credit Model: Application of an EM Algorithm*,
+    Muraki, E., (1992).
+    Applied Psychological Measurement.
+   ](https://doi.org/10.1177/014662169201600206)
+ * [*A Generalized Partial Credit Model*,
+    Muraki, E. (1997).
+    In Handbook of Modern Item Response Theory.
+   ](https://doi.org/10.1007/978-1-4757-2691-6_9)
+"""
 function GPCMItemBank(discriminations, cut_points::PerCategoryFloat)
     NominalItemBank(
         # XXX: Could probably be more efficient by making this lazy somehow

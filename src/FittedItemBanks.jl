@@ -49,12 +49,44 @@ using Polynomials
 
 const default_mass = 1e-2
 
+"""
+$(TYPEDEF)
+
+Base supertype for all item banks.
+"""
 abstract type AbstractItemBank end
 
+# This is used for dummy methods to document interfaces.
+struct _DocsItemBank
+    _DocsItemBank(::_DocsItemBank) = nothing
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns an `AbstractUnitRange` of item indices for the item bank.
+"""
 function Base.eachindex(item_bank::AbstractItemBank)
     Base.OneTo(length(item_bank))
 end
 
+"""
+```julia
+$(FUNCTIONNAME)(item_bank::AbstractItemBank)
+```
+
+Returns the number of items in the item bank.
+"""
+function Base.length(::_DocsItemBank) end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the raw parameters for the item at `idx` as a named tuple.
+This may return nothing for some item banks.
+This is debugging/informational use only.
+Use (ItemResponse)[@ref] for actual item response functions.
+"""
 function item_params(item_bank::AbstractItemBank, idx)
     (;)
 end
@@ -62,7 +94,11 @@ end
 """
 $(TYPEDEF)
 
-Domain type for a item banks' item response function.
+```julia
+$(FUNCTIONNAME)(::AbstractItemBank) -> DomainType
+```
+
+Domain type for a item banks' item response functions. Used as a trait.
 """
 abstract type DomainType end
 
@@ -115,7 +151,11 @@ struct DiscreteIterableDomain <: DiscreteDomain end
 """
 $(TYPEDEF)
 
-A response type for an item bank.
+```julia
+$(FUNCTIONNAME)(::AbstractItemBank) -> ResponseType
+```
+
+A response type for an item bank. Used as a trait.
 """
 abstract type ResponseType end
 
@@ -136,6 +176,7 @@ struct MultinomialResponse <: ResponseType end
 """
 $(TYPEDEF)
 $(TYPEDFIELDS)
+$(TYPEDSIGNATURES)
 
 An item response.
 """
@@ -147,6 +188,11 @@ end
 # Mark as a scalar for broadcasting
 Base.broadcastable(ir::ItemResponse) = Ref(ir)
 
+"""
+$(TYPEDSIGNATURES)
+
+Returns an `AbstractVector` of possible outcomes for a given (ItemResponse)[@ref].
+"""
 function responses(ir::ItemResponse)
     responses(ResponseType(ir.item_bank), ir)
 end
@@ -220,6 +266,8 @@ function search_per_dim(::OneDimContinuousDomain, ir, lo, hi, start, target, thr
 end
 
 """
+$(TYPEDSIGNATURES)
+
 Given an item bank, this function returns the domain of the item bank, i.e. the
 range (lo, hi) which includes for each item the range in which the the item
 response function is changing.
@@ -316,6 +364,40 @@ end
 
 VectorOfVectorsFloat64 = VectorOfVectors{
     Float64, Vector{Float64}, Vector{Int64}, Vector{Tuple{}}}
+
+"""
+```julia
+function $(FUNCTIONNAME)(item_bank::AbstractItemBank, idxs)
+```
+
+Return a new item bank of the same type, with the items at the given indices.
+"""
+function subset end
+
+"""
+```julia
+$(FUNCTIONNAME)(ir::ItemResponse, θ) -> Float64  # For BooleanResponse item banks only
+$(FUNCTIONNAME)(ir::ItemResponse, outcome, θ) -> Float64
+```
+
+Return the value of the item response outcome function for the item response
+`ir`, the outcome `outcome` and the ability values `θ`.
+For `BooleanResponse` item banks, `outcome` can be omitted in which case the
+outcome is assumed to be `true`.
+"""
+function resp end
+
+"""
+```julia
+$(FUNCTIONNAME)(ir::ItemResponse, θ) -> AbstractVector{Float64}
+```
+
+Return the vector value of the item response function for the item response
+`ir`, the outcome `outcome` and the ability values `θ`.
+
+The outcome at each index corresponds with the indices returned by the [responses](@ref) function.
+"""
+function resp_vec end
 
 include("./adapter.jl")
 include("./guess_slip_items.jl")

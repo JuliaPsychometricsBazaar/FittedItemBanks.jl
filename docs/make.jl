@@ -13,6 +13,7 @@ makedocs(;
     repo = GitHub("JuliaPsychometricsBazaar", "FittedItemBanks.jl"),
     sitename="FittedItemBanks.jl",
     format=format,
+    checkdocs=:public,
     pages=[
         "Home" => "index.md",
         "Reference" => ["interface.md", "parametric.md", "non_parametric.md"]

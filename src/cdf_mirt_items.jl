@@ -3,6 +3,11 @@
 using LinearAlgebra: dot
 
 """
+```julia
+struct $(FUNCTIONNAME) <: AbstractItemBank
+$(FUNCTIONNAME)(distribution, difficulties, discriminations) -> $(FUNCTIONNAME)
+```
+
 This item bank corresponds to the most commonly found version of MIRT in the
 literature. Its items feature multidimensional discriminations and its learners
 multidimensional abilities, but item difficulties are single-dimensional.

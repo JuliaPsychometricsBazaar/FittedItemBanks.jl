@@ -1,3 +1,11 @@
+"""
+```julia
+struct $(TransferItemBank) <: AbstractItemBank
+$(FUNCTIONNAME)(distribution, difficulties, discriminations) -> $(FUNCTIONNAME)
+```
+
+This item bank corresponds to a 2 parameter, single dimensional IRT model.
+"""
 struct TransferItemBank{DistT <: ContinuousUnivariateDistribution} <: AbstractItemBank
     distribution::DistT
     difficulties::Vector{Float64}
