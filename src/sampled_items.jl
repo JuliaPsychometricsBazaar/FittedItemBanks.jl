@@ -24,6 +24,10 @@ abstract type PointsItemBank <: AbstractItemBank end
 """
 $(TYPEDEF)
 $(TYPEDFIELDS)
+```julia
+DomainType(::DichotomousPointsItemBank) = DiscreteIndexableDomain()
+ResponseType(::DichotomousPointsItemBank) = BooleanResponse()
+```
 
 An item bank where all items have IRFs computed at a fixed grid across the
 latent/ability dimension specified as `xs`. The responses are stored in `ys`.
@@ -124,6 +128,14 @@ Nearest neighbor/staircase smoother.
 """
 struct NearestNeighborSmoother <: Smoother end
 
+"""
+$(TYPEDEF)
+```julia
+DichotomousSmoothedItemBank(item_bank::PointsItemBank, smoother::Smother)
+DomainType(::DichotomousSmoothedItemBank) = OneDimContinuousDomain()
+ResponseType(::DichotomousSmoothedItemBank) = BooleanResponse()
+```
+"""
 struct DichotomousSmoothedItemBank{P <: PointsItemBank, S <: Smoother} <: AbstractItemBank
     inner_bank::P
     smoother::S

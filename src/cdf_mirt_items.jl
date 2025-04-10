@@ -6,6 +6,8 @@ using LinearAlgebra: dot
 ```julia
 struct $(FUNCTIONNAME) <: AbstractItemBank
 $(FUNCTIONNAME)(distribution, difficulties, discriminations) -> $(FUNCTIONNAME)
+DomainType(::CdfMirtItemBank) = VectorContinuousDomain()
+ResponseType(::CdfMirtItemBank) = BooleanResponse()
 ```
 
 This item bank corresponds to the most commonly found version of MIRT in the

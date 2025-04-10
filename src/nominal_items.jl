@@ -7,6 +7,8 @@ PerCategoryFloat = AbstractArray{<:AbstractArray{Float64}, 1}
 ```julia
 struct $(FUNCTIONNAME) <: AbstractItemBank
 $(FUNCTIONNAME)(ranks, discriminations, cut_points) -> $(FUNCTIONNAME)
+DomainType(::NominalItemBank) = VectorContinuousDomain()
+ResponseType(::NominalItemBank) = MultinomialResponse()
 ```
 
 This item bank implements the nominal model. [The Graded Partial Credit Model

@@ -24,6 +24,10 @@ end
 
 """
 $(TYPEDEF)
+```julia
+DomainType(::MonopolyItemBank) = OneDimContinuousDomain()
+ResponseType(::MonopolyItemBank) = BooleanResponse()
+```
 
 This item bank implements the monotonic polynomial model with dichotomous responses.
 

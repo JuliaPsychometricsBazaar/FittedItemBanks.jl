@@ -1,5 +1,9 @@
 """
 $(TYPEDEF)
+```julia
+DomainType(::BSplineItemBank) = OneDimContinuousDomain()
+ResponseType(::BSplineItemBank) = BooleanResponse()
+```
 
 This item bank implements the a bank with B-spline based item-responses with
 dichotomous responses.

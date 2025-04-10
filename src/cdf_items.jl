@@ -2,6 +2,8 @@
 ```julia
 struct $(TransferItemBank) <: AbstractItemBank
 $(FUNCTIONNAME)(distribution, difficulties, discriminations) -> $(FUNCTIONNAME)
+DomainType(::TransferItemBank) = OneDimContinuousDomain()
+ResponseType(::TransferItemBank) = BooleanResponse()
 ```
 
 This item bank corresponds to a 2 parameter, single dimensional IRT model.
