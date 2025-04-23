@@ -6,7 +6,8 @@ from fitting an Item-Response Theory (IRT) model.
 module FittedItemBanks
 
 export AbstractItemBank, GuessItemBank
-export SlipItemBank, TransferItemBank
+export SlipItemBank
+export TransferItemBank, SlopeInterceptTransferItemBank
 export ItemBank2PL, ItemBank3PL, ItemBank4PL
 export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
 export NominalItemBank, GPCMItemBank
@@ -32,12 +33,14 @@ export ResponseType, BooleanResponse, MultinomialResponse
 
 export SimpleItemBankSpec, StdModel2PL, StdModel3PL, StdModel4PL
 
+export basic_item_bank, replace_basic_item_bank
+
 using Distributions
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
 using ArraysOfArrays: VectorOfArrays, nestedview
 using StaticArrays: SVector
-using PsychometricsBazaarBase.ConstDistributions: normal_scaled_logistic
+using PsychometricsBazaarBase.ConstDistributions: normal_scaled_logistic, std_logistic
 using PsychometricsBazaarBase.Interpolators: interp
 using DocStringExtensions
 using ArraysOfArrays

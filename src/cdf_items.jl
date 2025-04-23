@@ -1,6 +1,6 @@
 """
 ```julia
-struct $(TransferItemBank) <: AbstractItemBank
+struct TransferItemBank <: AbstractItemBank
 $(FUNCTIONNAME)(distribution, difficulties, discriminations) -> $(FUNCTIONNAME)
 DomainType(::TransferItemBank) = OneDimContinuousDomain()
 ResponseType(::TransferItemBank) = BooleanResponse()
@@ -105,13 +105,21 @@ function item_params(item_bank::TransferItemBank, idx)
 end
 
 function spec_description(item_bank::TransferItemBank, level)
-    if item_bank.distribution == normal_scaled_logistic
+    if item_bank.distribution == std_logistic
         if level == :long
-            return "Two parameter unidimensional item bank with normal scaled logistic distribution"
+            return "Two parameter unidimensional item bank with standard logistic distribution"
         elseif level == :short
             return "2PL"
         else
             return "2pl"
+        end
+    elseif item_bank.distribution == normal_scaled_logistic
+        if level == :long
+            return "Two parameter unidimensional item bank with normal scaled logistic distribution"
+        elseif level == :short
+            return "2PLN"
+        else
+            return "2pln"
         end
     else
         if level == :long
@@ -125,3 +133,145 @@ function spec_description(item_bank::TransferItemBank, level)
 end
 
 num_response_categories(ir::ItemResponse{<:TransferItemBank}) = 2
+
+"""
+```julia
+struct $(FUNCTIONNAME) <: AbstractItemBank
+$(FUNCTIONNAME)(distribution, difficulties, discriminations) -> $(FUNCTIONNAME)
+DomainType(::$(FUNCTIONNAME)) = OneDimContinuousDomain()
+ResponseType(::$(FUNCTIONNAME)) = BooleanResponse()
+```
+
+This item bank corresponds the slope-intercept form of teh 2 parameter, single
+dimensional IRT model.
+"""
+struct SlopeInterceptTransferItemBank{DistT <: ContinuousUnivariateDistribution} <: AbstractItemBank
+    distribution::DistT
+    intercepts::Vector{Float64}
+    slopes::Vector{Float64}
+end
+
+function SlopeInterceptTransferItemBank(item_bank::TransferItemBank)
+    SlopeInterceptTransferItemBank(
+        item_bank.distribution,
+        item_bank.difficulties .* item_bank.discriminations,
+        item_bank.discriminations
+    )
+end
+
+function TransferItemBank(item_bank::SlopeInterceptTransferItemBank)
+    TransferItemBank(
+        item_bank.distribution,
+        item_bank.intercepts ./ item_bank.slopes,
+        item_bank.slopes
+    )
+end
+
+DomainType(::SlopeInterceptTransferItemBank) = OneDimContinuousDomain()
+ResponseType(::SlopeInterceptTransferItemBank) = BooleanResponse()
+
+function Base.length(item_bank::SlopeInterceptTransferItemBank)
+    length(item_bank.intercepts)
+end
+
+function subset(item_bank::SlopeInterceptTransferItemBank, idxs)
+    SlopeInterceptTransferItemBank(
+        item_bank.distribution,
+        item_bank.intercepts[idxs],
+        item_bank.slopes[idxs]
+    )
+end
+
+function _norm_abil_1d_si(θ, intercept, slope)
+    θ * slope - intercept
+end
+
+function _unnorm_abil_1d_si(θ, intercept, slope)
+    (θ + intercept) / slope
+end
+
+function norm_abil(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    _norm_abil_1d_si(
+        θ, ir.item_bank.intercepts[ir.index], ir.item_bank.slopes[ir.index])
+end
+
+function unnorm_abil(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    _unnorm_abil_1d_si(
+        θ, ir.item_bank.intercepts[ir.index], ir.item_bank.slopes[ir.index])
+end
+
+function resp_vec(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    resp1 = resp(ir, θ)
+    SVector(1.0 - resp1, resp1)
+end
+
+function item_domain(ir::ItemResponse{<:SlopeInterceptTransferItemBank};
+        mass = default_mass, left_mass = mass, right_mass = mass)
+    (
+        unnorm_abil(ir, quantile(ir.item_bank.distribution, left_mass)),
+        unnorm_abil(ir, quantile(ir.item_bank.distribution, 1.0 - right_mass))
+    )
+end
+
+function maxabilresp(::ItemResponse{<:SlopeInterceptTransferItemBank})
+    return SVector(0.0, 1.0)
+end
+
+function minabilresp(::ItemResponse{<:SlopeInterceptTransferItemBank})
+    return SVector(1.0, 0.0)
+end
+
+function resp(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, outcome::Bool, θ)
+    if outcome
+        resp(ir, θ)
+    else
+        cresp(ir, θ)
+    end
+end
+
+function resp(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    cdf(ir.item_bank.distribution, norm_abil(ir, θ))
+end
+
+function density(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    pdf(ir.item_bank.distribution, norm_abil(ir, θ))
+end
+
+function cresp(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    ccdf(ir.item_bank.distribution, norm_abil(ir, θ))
+end
+
+function item_params(item_bank::SlopeInterceptTransferItemBank, idx)
+    (; intercept = item_bank.intercepts[idx],
+       slope = item_bank.slopes[idx])
+end
+
+function spec_description(item_bank::SlopeInterceptTransferItemBank, level)
+    if item_bank.distribution == std_logistic
+        if level == :long
+            return "Two parameter unidimensional item bank, slope-intercept parameterization, with standard logistic distribution"
+        elseif level == :short
+            return "2PL"
+        else
+            return "2pl"
+        end
+    elseif item_bank.distribution == normal_scaled_logistic
+        if level == :long
+            return "Two parameter unidimensional item bank, slope-intercept parameterization, with normal scaled logistic distribution"
+        elseif level == :short
+            return "2PLN"
+        else
+            return "2pln"
+        end
+    else
+        if level == :long
+            return "Two parameter unidimensional item bank, slope-intercept parameterization, with unknown transfer function"
+        elseif level == :short
+            return "2P"
+        else
+            return "2p"
+        end
+    end
+end
+
+num_response_categories(ir::ItemResponse{<:SlopeInterceptTransferItemBank}) = 2

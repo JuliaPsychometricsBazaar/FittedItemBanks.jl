@@ -1,5 +1,6 @@
 using Setfield
 using Lazy: @forward
+using ConstructionBase: setproperties
 
 function assert_boolean_response(item_bank)
     if !(ResponseType(item_bank) isa BooleanResponse)
@@ -18,6 +19,9 @@ struct FixedGuessItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
     function FixedGuessItemBank(::BooleanResponse, guess, inner_bank)
         new{typeof(inner_bank)}(guess, inner_bank)
     end
+end
+function FixedGuessItemBank{OutInnerItemBankT}(item_bank::FixedGuessItemBank) where {OutInnerItemBankT}
+    FixedGuessItemBank(OutInnerItemBankT(item_bank.inner_bank))
 end
 y_offset(item_bank::FixedGuessItemBank, item_idx) = item_bank.guess
 @forward FixedGuessItemBank.inner_bank Base.length, domdims
@@ -39,6 +43,9 @@ struct FixedSlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
         new{typeof(inner_bank)}(slip, inner_bank)
     end
 end
+function FixedSlipItemBank{OutInnerItemBankT}(item_bank::FixedSlipItemBank) where {OutInnerItemBankT}
+    FixedSlipItemBank(OutInnerItemBankT(item_bank.inner_bank))
+end
 y_offset(item_bank::FixedSlipItemBank, item_idx) = item_bank.slip
 @forward FixedSlipItemBank.inner_bank Base.length, domdims, subset
 function subset(item_bank::FixedSlipItemBank, idxs)
@@ -59,6 +66,9 @@ struct GuessItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
         new{typeof(inner_bank)}(guesses, inner_bank)
     end
 end
+function GuessItemBank{OutInnerItemBankT}(item_bank::GuessItemBank) where {OutInnerItemBankT}
+    GuessItemBank(OutInnerItemBankT(item_bank.inner_bank))
+end
 y_offset(item_bank::GuessItemBank, item_idx) = item_bank.guesses[item_idx]
 @forward GuessItemBank.inner_bank Base.length, domdims
 function subset(item_bank::GuessItemBank, idxs)
@@ -78,6 +88,9 @@ struct SlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
     function SlipItemBank(::BooleanResponse, slips, inner_bank)
         new{typeof(inner_bank)}(slips, inner_bank)
     end
+end
+function SlipItemBank{OutInnerItemBankT}(item_bank::SlipItemBank) where {OutInnerItemBankT}
+    SlipItemBank(OutInnerItemBankT(item_bank.inner_bank))
 end
 y_offset(item_bank::SlipItemBank, item_idx) = item_bank.slips[item_idx]
 @forward SlipItemBank.inner_bank Base.length, domdims
@@ -100,6 +113,39 @@ function inner_item_response(ir::ItemResponse{<:AnySlipOrGuessItemBank})
     ItemResponse(ir.item_bank.inner_bank, ir.index)
 end
 num_response_categories(ir::ItemResponse{<:AnySlipOrGuessItemBank}) = 2
+
+function basic_item_bank(::Type{AnySlipOrGuessItemBankT}) where {
+    T,
+    AnySlipOrGuessItemBankT <: Union{
+        SlipItemBank{T},
+        FixedSlipItemBank{T},
+        GuessItemBank{T},
+        FixedGuessItemBank{T}
+    }
+}
+    basic_item_bank(T)
+end
+
+basic_item_bank(item_bank_type::Type) = item_bank_type
+
+function replace_basic_item_bank(
+    item_bank::AnySlipOrGuessItemBankT,
+    new_inner
+) where {
+    T,
+    AnySlipOrGuessItemBankT <: Union{
+        SlipItemBank{T},
+        FixedSlipItemBank{T},
+        GuessItemBank{T},
+        FixedGuessItemBank{T}
+    }
+}
+    setproperties(item_bank; inner_bank = replace_basic_item_bank(item_bank.inner_bank, new_inner))
+end
+
+function replace_basic_item_bank(item_bank, new_inner)
+    new_inner(item_bank)
+end
 
 # Ensure we always have Slip{Guess{ItemBank}}
 function FixedGuessItemBank(guess::Float64, inner_bank::AnySlipItemBank)

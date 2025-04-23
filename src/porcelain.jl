@@ -16,7 +16,7 @@ function ItemBank2PL(
         difficulties,
         discriminations
 )
-    TransferItemBank(normal_scaled_logistic, difficulties, discriminations)
+    TransferItemBank(std_logistic, difficulties, discriminations)
 end
 
 """
@@ -52,7 +52,7 @@ function ItemBankMirt2PL(
         difficulties,
         discriminations
 )
-    CdfMirtItemBank(normal_scaled_logistic, difficulties, discriminations)
+    CdfMirtItemBank(std_logistic, difficulties, discriminations)
 end
 
 """

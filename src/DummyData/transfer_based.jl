@@ -1,7 +1,7 @@
 dummy_difficulties(rng, num_questions) = rand(rng, std_normal, num_questions)
-dummy_discriminations(rng, num_questions) = abs_rand(rng, Normal(1.0, 0.2), num_questions)
+dummy_discriminations(rng, num_questions) = abs_rand(rng, Normal(2.0, 0.2), num_questions)
 function dummy_discriminations(rng, dims, num_questions)
-    abs_rand(rng, Normal(1.0, 0.2), dims, num_questions)
+    abs_rand(rng, Normal(2.0, 0.2), dims, num_questions)
 end
 dummy_guesses(rng, num_questions) = clamp_rand(rng, Normal(0.0, 0.2), num_questions)
 dummy_slips(rng, num_questions) = clamp_rand(rng, Normal(0.0, 0.2), num_questions)
