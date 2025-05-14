@@ -8,14 +8,15 @@ ResponseType(::TransferItemBank) = BooleanResponse()
 
 This item bank corresponds to a 2 parameter, single dimensional IRT model.
 """
-struct TransferItemBank{DistT <: ContinuousUnivariateDistribution} <: AbstractItemBank
+struct TransferItemBank{DistT <: ContinuousUnivariateDistribution, ParamT <: Number} <: AbstractItemBank
     distribution::DistT
-    difficulties::Vector{Float64}
-    discriminations::Vector{Float64}
+    difficulties::Vector{ParamT}
+    discriminations::Vector{ParamT}
 end
 
 DomainType(::TransferItemBank) = OneDimContinuousDomain()
 ResponseType(::TransferItemBank) = BooleanResponse()
+Base.eltype(::TransferItemBank{_, ParamT}) where {_, ParamT} = ParamT
 
 function Base.length(item_bank::TransferItemBank)
     length(item_bank.difficulties)
@@ -102,6 +103,14 @@ end
 function item_params(item_bank::TransferItemBank, idx)
     (; difficulty = item_bank.difficulties[idx],
         discrimination = item_bank.discriminations[idx])
+end
+
+function convert_parameter_type(T::Type, item_bank::TransferItemBank{DistT}) where {DistT}
+    TransferItemBank(
+        convert(constructorof(DistT){T}, item_bank.distribution),
+        convert(Vector{T}, item_bank.difficulties),
+        convert(Vector{T}, item_bank.discriminations)
+    )
 end
 
 function spec_description(item_bank::TransferItemBank, level)

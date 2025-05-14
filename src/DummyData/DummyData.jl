@@ -8,7 +8,7 @@ using BSplines
 import ..SimpleItemBankSpec, ..StdModelForm, ..StdModel2PL, ..StdModel3PL, ..StdModel4PL
 import ..OneDimContinuousDomain, ..VectorContinuousDomain, ..BooleanResponse,
        ..MultinomialResponse, ..ItemBank
-import ..GuessItemBank, ..SlipItemBank
+import ..GuessItemBank, ..GuessAndSlipItemBank
 import ..ItemResponse, ..resp
 import ..MonopolyItemBank, ..BSplineItemBank
 import ..FittedItemBanks: FittedItemBanks
