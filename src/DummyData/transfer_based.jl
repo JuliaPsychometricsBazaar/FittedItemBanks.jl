@@ -66,9 +66,10 @@ end
 
 function dummy_item_bank(
         rng::AbstractRNG, spec::SimpleItemBankSpec{StdModel4PL}, num_questions, rest...)
-    SlipItemBank(
+    GuessAndSlipItemBank(
+        dummy_guesses(rng, num_questions),
         dummy_slips(rng, num_questions),
-        dummy_item_bank(rng, SimpleItemBankSpec(StdModel3PL(), spec.domain, spec.response),
+        dummy_item_bank(rng, SimpleItemBankSpec(StdModel2PL(), spec.domain, spec.response),
             num_questions, rest...)
     )
 end

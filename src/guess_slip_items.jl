@@ -2,144 +2,110 @@ using Setfield
 using Lazy: @forward
 using ConstructionBase: setproperties
 
-function assert_boolean_response(item_bank)
-    if !(ResponseType(item_bank) isa BooleanResponse)
-        error("Guess/slip item banks can only wrap item banks with a ResponseType of BooleanResponse, not $(ResponseType(item_bank))")
-    end
-    item_bank
-end
+## GuessAndSlipItemBank implementation
 
-struct FixedGuessItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
-    guess::Float64
-    inner_bank::InnerItemBank
+struct GuessAndSlipItemBank{
+    InnerItemBankT <: AbstractItemBank,
+    ParamT <: Number,
+    GuessArrayT <: AbstractArray{ParamT},
+    SlipArrayT <: AbstractArray{ParamT}
+} <: AbstractItemBank
+    guesses::GuessArrayT
+    slips::SlipArrayT
+    inner_bank::InnerItemBankT
 
-    function FixedGuessItemBank(guess, inner_bank)
-        FixedGuessItemBank(ResponseType(inner_bank), guess, inner_bank)
-    end
-    function FixedGuessItemBank(::BooleanResponse, guess, inner_bank)
-        new{typeof(inner_bank)}(guess, inner_bank)
-    end
-end
-function FixedGuessItemBank{OutInnerItemBankT}(item_bank::FixedGuessItemBank) where {OutInnerItemBankT}
-    FixedGuessItemBank(OutInnerItemBankT(item_bank.inner_bank))
-end
-y_offset(item_bank::FixedGuessItemBank, item_idx) = item_bank.guess
-@forward FixedGuessItemBank.inner_bank Base.length, domdims
-function subset(item_bank::FixedGuessItemBank, idxs)
-    FixedGuessItemBank(item_bank.guess, subset(item_bank.inner_bank, idxs))
-end
-function item_params(item_bank::FixedGuessItemBank, idx)
-    (; item_params(item_bank.inner_bank, idx)..., guess = item_bank.guess)
-end
-
-struct FixedSlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
-    slip::Float64
-    inner_bank::InnerItemBank
-
-    function FixedSlipItemBank(slip, inner_bank)
-        FixedSlipItemBank(ResponseType(inner_bank), slip, inner_bank)
-    end
-    function FixedSlipItemBank(::BooleanResponse, slip, inner_bank)
-        new{typeof(inner_bank)}(slip, inner_bank)
+    function GuessAndSlipItemBank(guesses, slips, inner_bank)
+        if !(ResponseType(inner_bank) isa BooleanResponse)
+            error("Guess/slip item banks can only wrap item banks with a ResponseType of BooleanResponse, not $(ResponseType(item_bank))")
+        end
+        param_t = eltype(guesses)
+        # XXX: Could also promote two to match rather than this check
+        if eltype(slips) !== param_t 
+            error("Guess/slip item banks must have the same parameter type for guesses and slips")
+        end
+        # XXX: No need for the following, but could promote guesses/slips to the same type as inner bank?
+        #=
+        if eltype(inner_bank) !== param_t
+            error("Guess/slip item banks must have the same parameter type for inner bank and guesses/slips")
+        end
+        =#
+        new{typeof(inner_bank), param_t, typeof(guesses), typeof(slips)}(
+            guesses, slips, inner_bank
+        )
     end
 end
-function FixedSlipItemBank{OutInnerItemBankT}(item_bank::FixedSlipItemBank) where {OutInnerItemBankT}
-    FixedSlipItemBank(OutInnerItemBankT(item_bank.inner_bank))
-end
-y_offset(item_bank::FixedSlipItemBank, item_idx) = item_bank.slip
-@forward FixedSlipItemBank.inner_bank Base.length, domdims, subset
-function subset(item_bank::FixedSlipItemBank, idxs)
-    FixedSlipItemBank(item_bank.slip, subset(item_bank.inner_bank, idxs))
-end
-function item_params(item_bank::FixedSlipItemBank, idx)
-    (; item_params(item_bank.inner_bank, idx)..., slip = item_bank.slip)
+
+irf_size(guess, slip) = 1.0 - guess - slip
+
+@inline function transform_irf_y(guess, slip, y)
+    guess + irf_size(guess, slip) * y
 end
 
-struct GuessItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
-    guesses::Vector{Float64}
-    inner_bank::InnerItemBank
-
-    function GuessItemBank(guesses, inner_bank)
-        GuessItemBank(ResponseType(inner_bank), guesses, inner_bank)
-    end
-    function GuessItemBank(::BooleanResponse, guesses, inner_bank)
-        new{typeof(inner_bank)}(guesses, inner_bank)
+@inline function transform_irf_y(ir::ItemResponse{<:GuessAndSlipItemBank}, response, y)
+    guess = ir.item_bank.guesses[ir.index]
+    slip = ir.item_bank.slips[ir.index]
+    if response
+        transform_irf_y(guess, slip, y)
+    else
+        transform_irf_y(slip, guess, y)
     end
 end
-function GuessItemBank{OutInnerItemBankT}(item_bank::GuessItemBank) where {OutInnerItemBankT}
-    GuessItemBank(OutInnerItemBankT(item_bank.inner_bank))
-end
-y_offset(item_bank::GuessItemBank, item_idx) = item_bank.guesses[item_idx]
-@forward GuessItemBank.inner_bank Base.length, domdims
-function subset(item_bank::GuessItemBank, idxs)
-    GuessItemBank(item_bank.guesses[idxs], subset(item_bank.inner_bank, idxs))
-end
-function item_params(item_bank::GuessItemBank, idx)
-    (; item_params(item_bank.inner_bank, idx)..., guess = item_bank.guesses[idx])
+
+@forward GuessAndSlipItemBank.inner_bank Base.length, domdims
+
+function subset(item_bank::GuessAndSlipItemBank, idxs)
+    GuessAndSlipItemBank(
+        item_bank.guesses[idxs],
+        item_bank.slips[idxs],
+        subset(item_bank.inner_bank, idxs)
+    )
 end
 
-struct SlipItemBank{InnerItemBank <: AbstractItemBank} <: AbstractItemBank
-    slips::Vector{Float64}
-    inner_bank::InnerItemBank
+function guess_slip_indicators(item_bank::GuessAndSlipItemBank)
+    return (
+        item_bank.guesses isa Zeros,
+        item_bank.slips isa Zeros,
+    )
+end
 
-    function SlipItemBank(slips, inner_bank)
-        SlipItemBank(ResponseType(inner_bank), slips, inner_bank)
+function item_params(item_bank::GuessAndSlipItemBank, idx)
+    guesses_zeros, slips_zeros = guess_slip_indicators(item_bank)
+    if guesses_zeros && slips_zeros
+        item_params(item_bank, idx)
+    elseif guesses_zeros
+        (;
+            item_params(item_bank.inner_bank, idx)...,
+            slip = item_bank.slips[idx]
+        )
+    elseif slips_zeros
+        (;
+            item_params(item_bank.inner_bank, idx)...,
+            guess = item_bank.guesses[idx]
+        )
+    else
+        (;
+            item_params(item_bank.inner_bank, idx)...,
+            guess = item_bank.guesses[idx],
+            slip = item_bank.slips[idx]
+        )
     end
-    function SlipItemBank(::BooleanResponse, slips, inner_bank)
-        new{typeof(inner_bank)}(slips, inner_bank)
-    end
-end
-function SlipItemBank{OutInnerItemBankT}(item_bank::SlipItemBank) where {OutInnerItemBankT}
-    SlipItemBank(OutInnerItemBankT(item_bank.inner_bank))
-end
-y_offset(item_bank::SlipItemBank, item_idx) = item_bank.slips[item_idx]
-@forward SlipItemBank.inner_bank Base.length, domdims
-function subset(item_bank::SlipItemBank, idxs)
-    SlipItemBank(item_bank.slips[idxs], subset(item_bank.inner_bank, idxs))
-end
-function item_params(item_bank::SlipItemBank, idx)
-    (; item_params(item_bank.inner_bank, idx)..., slip = item_bank.slips[idx])
 end
 
-const AnySlipItemBank = Union{SlipItemBank, FixedSlipItemBank}
-const AnyGuessItemBank = Union{GuessItemBank, FixedGuessItemBank}
-const AnySlipOrGuessItemBank = Union{AnySlipItemBank, AnyGuessItemBank}
-const AnySlipAndGuessItemBank = Union{
-    SlipItemBank{<:AnyGuessItemBank}, FixedSlipItemBank{<:AnyGuessItemBank}}
+function convert_parameter_type(T::Type, item_bank::GuessAndSlipItemBank)
+    SlipItemBank(convert(Vector{T}, item_bank.slips), convert_parameter_type(T, item_bank.inner_bank))
+end
 
-DomainType(item_bank::AnySlipOrGuessItemBank) = DomainType(item_bank.inner_bank)
-ResponseType(item_bank::AnySlipOrGuessItemBank) = ResponseType(item_bank.inner_bank)
-function inner_item_response(ir::ItemResponse{<:AnySlipOrGuessItemBank})
+DomainType(item_bank::GuessAndSlipItemBank) = DomainType(item_bank.inner_bank)
+ResponseType(item_bank::GuessAndSlipItemBank) = ResponseType(item_bank.inner_bank)
+function inner_item_response(ir::ItemResponse{<: GuessAndSlipItemBank})
     ItemResponse(ir.item_bank.inner_bank, ir.index)
 end
-num_response_categories(ir::ItemResponse{<:AnySlipOrGuessItemBank}) = 2
+num_response_categories(ir::ItemResponse{<:GuessAndSlipItemBank}) = 2
 
-function basic_item_bank(::Type{AnySlipOrGuessItemBankT}) where {
-    T,
-    AnySlipOrGuessItemBankT <: Union{
-        SlipItemBank{T},
-        FixedSlipItemBank{T},
-        GuessItemBank{T},
-        FixedGuessItemBank{T}
-    }
-}
-    basic_item_bank(T)
-end
+basic_item_bank(::Type{<: GuessAndSlipItemBank{T}}) where {T} = basic_item_bank(T)
+basic_item_bank(::Type{T}) where {T} = T
 
-basic_item_bank(item_bank_type::Type) = item_bank_type
-
-function replace_basic_item_bank(
-    item_bank::AnySlipOrGuessItemBankT,
-    new_inner
-) where {
-    T,
-    AnySlipOrGuessItemBankT <: Union{
-        SlipItemBank{T},
-        FixedSlipItemBank{T},
-        GuessItemBank{T},
-        FixedGuessItemBank{T}
-    }
-}
+function replace_basic_item_bank(item_bank::GuessAndSlipItemBank, new_inner)
     setproperties(item_bank; inner_bank = replace_basic_item_bank(item_bank.inner_bank, new_inner))
 end
 
@@ -147,89 +113,55 @@ function replace_basic_item_bank(item_bank, new_inner)
     new_inner(item_bank)
 end
 
-# Ensure we always have Slip{Guess{ItemBank}}
-function FixedGuessItemBank(guess::Float64, inner_bank::AnySlipItemBank)
-    @set inner_bank.inner_bank = FixedGuessItemBank(guess, inner_bank.inner_bank)
-end
-
-function GuessItemBank(guesses::Vector{Float64}, inner_bank::AnySlipItemBank)
-    @set inner_bank.inner_bank = GuessItemBank(guess, inner_bank.inner_bank)
-end
-
-irf_size(guess, slip) = 1.0 - guess - slip
-
-@inline function transform_irf_y(guess::Float64, slip::Float64, y)
-    guess + irf_size(guess, slip) * y
-end
-
-@inline function transform_irf_y(ir::ItemResponse{<:GuessItemBank}, response, y)
-    guess = y_offset(ir.item_bank, ir.index)
-    if response
-        transform_irf_y(guess, 0.0, y)
-    else
-        transform_irf_y(0.0, guess, y)
-    end
-end
-
-@inline function transform_irf_y(ir::ItemResponse{<:SlipItemBank}, response, y)
-    slip = y_offset(ir.item_bank, ir.index)
-    if response
-        transform_irf_y(0.0, slip, y)
-    else
-        transform_irf_y(slip, 0.0, y)
-    end
-end
-
-function (ir::ItemResponse{<:AnySlipOrGuessItemBank})(θ)
-    resp(ir, θ)
-end
-
-function resp(ir::ItemResponse{<:AnySlipOrGuessItemBank}, θ)
+function resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
     resp(ir, true, θ)
 end
 
-function resp(ir::ItemResponse{<:AnySlipOrGuessItemBank}, response, θ)
+function resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ)
     transform_irf_y(ir, response, resp(inner_item_response(ir), response, θ))
 end
 
-function resp_vec(ir::ItemResponse{<:AnySlipOrGuessItemBank}, θ)
+function resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
     r = resp_vec(inner_item_response(ir), θ)
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
 
-function item_domain(ir::ItemResponse{<:AnySlipOrGuessItemBank}; kwargs...)
+function item_domain(ir::ItemResponse{<:GuessAndSlipItemBank}; kwargs...)
     item_domain(inner_item_response(ir); kwargs...)
 end
 
-function maxabilresp(ir::ItemResponse{<:AnySlipOrGuessItemBank})
+function maxabilresp(ir::ItemResponse{<:GuessAndSlipItemBank})
     r = maxabilresp(inner_item_response(ir))
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
 
-function minabilresp(ir::ItemResponse{<:AnySlipOrGuessItemBank})
+function minabilresp(ir::ItemResponse{<:GuessAndSlipItemBank})
     r = minabilresp(inner_item_response(ir))
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
 
-# XXX: Not getting dispatched to
-function resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, θ)
-    transform_irf_y(
-        y_offset(ir.item_bank.inner_bank, ir.index),
-        y_offset(ir.item_bank, ir.index),
-        resp(ItemResponse(ir.item_bank.inner_bank.inner_bank, ir.index), θ)
-    )
+log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ) = log(resp(ir, response, θ))
+log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log(resp(ir, θ))
+log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log.(resp_vec(ir, θ))
+
+## Psuedo-constructors
+
+function FixedGuessItemBank(guess, inner_bank)
+    nitems = length(inner_bank)
+    GuessAndSlipItemBank(Fill(guess, nitems), Zeros(nitems), inner_bank)
 end
 
-function resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, response, θ)
-    transform_irf_y(
-        y_offset(ir.item_bank.inner_bank, ir.index),
-        y_offset(ir.item_bank, ir.index),
-        resp(ItemResponse(ir.item_bank.inner_bank, ir.index), response, θ)
-    )
+function FixedSlipItemBank(slip, inner_bank)
+    nitems = length(inner_bank)
+    GuessAndSlipItemBank(Zeros(nitems), Fill(slip, nitems), inner_bank)
 end
 
-function log_resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, response, θ)
-    log(resp(ir, response, θ))
+function GuessItemBank(guesses, inner_bank)
+    nitems = length(inner_bank)
+    GuessAndSlipItemBank(guesses, Zeros(nitems), inner_bank)
 end
-log_resp(ir::ItemResponse{<:AnySlipAndGuessItemBank}, θ) = log(resp(ir, θ))
-log_resp_vec(ir::ItemResponse{<:AnySlipAndGuessItemBank}, θ) = log.(resp_vec(ir, θ))
+
+function SlipItemBank(slips, inner_bank)
+    nitems = length(inner_bank)
+    GuessAndSlipItemBank(Zeros(nitems), slips, inner_bank)
+end

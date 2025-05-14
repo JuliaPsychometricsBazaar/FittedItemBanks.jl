@@ -5,8 +5,9 @@ from fitting an Item-Response Theory (IRT) model.
 """
 module FittedItemBanks
 
-export AbstractItemBank, GuessItemBank
-export SlipItemBank
+export AbstractItemBank
+export GuessAndSlipItemBank
+export GuessItemBank, SlipItemBank, FixedGuessItemBank, FixedSlipItemBank
 export TransferItemBank, SlopeInterceptTransferItemBank
 export ItemBank2PL, ItemBank3PL, ItemBank4PL
 export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
@@ -35,6 +36,8 @@ export SimpleItemBankSpec, StdModel2PL, StdModel3PL, StdModel4PL
 
 export basic_item_bank, replace_basic_item_bank
 
+public guess_slip_indicators
+
 using Distributions
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
@@ -49,6 +52,7 @@ using BSplines: NoDerivative, bsplines_destarray, _bsplines!, bsplines_offsetarr
 using LogExpFunctions
 using ResumableFunctions
 using Polynomials
+using ConstructionBase
 
 const default_mass = 1e-2
 
@@ -401,6 +405,8 @@ Return the vector value of the item response function for the item response
 The outcome at each index corresponds with the indices returned by the [responses](@ref) function.
 """
 function resp_vec end
+
+function convert_parameter_type end
 
 include("./adapter.jl")
 include("./guess_slip_items.jl")
