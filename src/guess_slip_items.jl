@@ -140,9 +140,11 @@ function minabilresp(ir::ItemResponse{<:GuessAndSlipItemBank})
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
 
+#=
 log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ) = log(resp(ir, response, θ))
 log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log(resp(ir, θ))
 log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log.(resp_vec(ir, θ))
+=#
 
 ## Psuedo-constructors
 
