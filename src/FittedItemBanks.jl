@@ -9,6 +9,7 @@ export AbstractItemBank
 export GuessAndSlipItemBank
 export GuessItemBank, SlipItemBank, FixedGuessItemBank, FixedSlipItemBank
 export TransferItemBank, SlopeInterceptTransferItemBank
+export CdfMirtItemBank, SlopeInterceptMirtItemBank
 export ItemBank2PL, ItemBank3PL, ItemBank4PL
 export ItemBankMirt2PL, ItemBankMirt3PL, ItemBankMirt4PL
 export NominalItemBank, GPCMItemBank
