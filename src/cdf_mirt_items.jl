@@ -172,3 +172,158 @@ function spec_description(item_bank::CdfMirtItemBank, level)
         end
     end
 end
+
+"""
+```julia
+struct $(FUNCTIONNAME) <: AbstractItemBank
+$(FUNCTIONNAME)(distribution, difficulties, discriminations) -> $(FUNCTIONNAME)
+DomainType(::SlopeInterceptMirtItemBank) = VectorContinuousDomain()
+ResponseType(::SlopeInterceptMirtItemBank) = BooleanResponse()
+```
+
+This item bank corresponds to the slope-intercept version of MIRT in the
+literature. Its items feature multidimensional discriminations and its learners
+multidimensional abilities, but item difficulties are single-dimensional.
+"""
+struct SlopeInterceptMirtItemBank{DistT <: ContinuousUnivariateDistribution} <: AbstractItemBank
+    distribution::DistT
+    intercepts::Vector{Float64}
+    slopes::Matrix{Float64}
+
+    function SlopeInterceptMirtItemBank(
+            distribution::DistT,
+            intercepts::Vector{Float64},
+            slopes::Matrix{Float64}
+    ) where {DistT <: ContinuousUnivariateDistribution}
+        if size(slopes, 2) != length(intercepts)
+            error(
+                "Number of items in first (only) dimension of difficulties " *
+                "should match number of item in 2nd dimension of discriminations"
+            )
+        end
+        new{typeof(distribution)}(distribution, intercepts, slopes)
+    end
+end
+
+function SlopeInterceptMirtItemBank(item_bank::CdfMirtItemBank)
+    SlopeInterceptMirtItemBank(
+        item_bank.distribution,
+        [diff * sum(disc) for (diff, disc) in zip(item_bank.difficulties, eachcol(item_bank.discriminations))],
+        item_bank.discriminations
+    )
+end
+
+function CdfMirtItemBank(item_bank::SlopeInterceptMirtItemBank)
+    CdfMirtItemBank(
+        item_bank.distribution,
+        [intercept / sum(slope) for (intercept, slope) in zip(item_bank.intercepts, eachcol(item_bank.slopes))],
+        item_bank.slopes
+    )
+end
+
+DomainType(::SlopeInterceptMirtItemBank) = VectorContinuousDomain()
+ResponseType(::SlopeInterceptMirtItemBank) = BooleanResponse()
+
+function Base.length(item_bank::SlopeInterceptMirtItemBank)
+    length(item_bank.intercepts)
+end
+
+function subset(item_bank::SlopeInterceptMirtItemBank, idxs)
+    SlopeInterceptMirtItemBank(
+        item_bank.distribution,
+        item_bank.intercepts[idxs],
+        item_bank.slopes[:, idxs]
+    )
+end
+
+function domdims(item_bank::SlopeInterceptMirtItemBank)
+    size(item_bank.slopes, 1)
+end
+
+function _mirt_norm_abil_si(θ, intercept, slope)
+    dot(θ, slope)  .- intercept
+end
+
+function norm_abil(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
+    _mirt_norm_abil_si(θ, ir.item_bank.intercepts[ir.index],
+        @view ir.item_bank.slopes[:, ir.index])
+end
+
+function resp_vec(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
+    resp1 = resp(ir, θ)
+    SVector(1.0 - resp1, resp1)
+end
+
+#=
+function item_domain(
+        ir::ItemResponse{<:SlopeInterceptMirtItemBank}; reference_point, mass = default_mass, left_mass = mass, right_mass = mass)
+    ndims = domdims(ir.item_bank)
+    z_lo = quantile(ir.item_bank.distribution, left_mass)
+    z_hi = quantile(ir.item_bank.distribution, 1.0 - right_mass)
+    lo = fill(Inf, ndims)
+    hi = fill(-Inf, ndims)
+    difficulty = ir.item_bank.difficulties[ir.index]
+    discrimination = @view ir.item_bank.discriminations[:, ir.index]
+    diff_disc = sum(difficulty .* discrimination)
+    function nearest_point(z)
+        c = z + diff_disc
+        t = (c - dot(reference_point, discrimination)) / sum(discrimination .^ 2)
+        return reference_point .+ t .* discrimination
+    end
+    function update_bounds!(point)
+        for i in 1:ndims
+            if point[i] < lo[i]
+                lo[i] = point[i]
+            end
+            if point[i] > hi[i]
+                hi[i] = point[i]
+            end
+        end
+    end
+    update_bounds!(nearest_point(z_lo))
+    update_bounds!(nearest_point(z_hi))
+    return (lo, hi)
+end
+=#
+
+function resp(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, outcome::Bool, θ)
+    if outcome
+        resp(ir, θ)
+    else
+        cresp(ir, θ)
+    end
+end
+
+function resp(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
+    cdf(ir.item_bank.distribution, norm_abil(ir, θ))
+end
+
+function cresp(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
+    ccdf(ir.item_bank.distribution, norm_abil(ir, θ))
+end
+
+function item_params(item_bank::SlopeInterceptMirtItemBank, idx)
+    (; intercept = item_bank.intercepts[idx],
+       slop = @view item_bank.slopes[:, idx])
+end
+
+function spec_description(item_bank::SlopeInterceptMirtItemBank, level)
+    dim = length(item_bank.slopes)
+    if item_bank.distribution == normal_scaled_logistic
+        if level == :long
+            return "Two parameter $(dim)-dimensional slope-intercept multidimensional item bank with normal scaled logistic distribution"
+        elseif level == :short
+            return "2PL MIRT $(dim)d"
+        else
+            return "2pl_mirt_$(dim)d"
+        end
+    else
+        if level == :long
+            return "Two parameter $(dim)-dimensional slope-intercept multidimensional item bank with unknown transfer function"
+        elseif level == :short
+            return "2P MIRT $(dim)d"
+        else
+            return "2p_mirt_$(dim)d"
+        end
+    end
+end
