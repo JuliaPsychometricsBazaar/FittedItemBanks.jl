@@ -64,6 +64,9 @@ Base supertype for all item banks.
 """
 abstract type AbstractItemBank end
 
+# Opt out of broadcasting
+Base.broadcastable(item_bank::AbstractItemBank) = Ref(item_bank)
+
 # This is used for dummy methods to document interfaces.
 struct _DocsItemBank
     _DocsItemBank(::_DocsItemBank) = nothing
