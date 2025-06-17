@@ -8,10 +8,10 @@ ResponseType(::TransferItemBank) = BooleanResponse()
 
 This item bank corresponds to a 2 parameter, single dimensional IRT model.
 """
-struct TransferItemBank{DistT <: ContinuousUnivariateDistribution, ParamT <: Number} <: AbstractItemBank
+struct TransferItemBank{DistT <: ContinuousUnivariateDistribution, ParamVecT <: AbstractVector{<:Number}} <: AbstractItemBank
     distribution::DistT
-    difficulties::Vector{ParamT}
-    discriminations::Vector{ParamT}
+    difficulties::ParamVecT
+    discriminations::ParamVecT
 end
 
 DomainType(::TransferItemBank) = OneDimContinuousDomain()
@@ -23,6 +23,13 @@ function Base.length(item_bank::TransferItemBank)
 end
 
 function subset(item_bank::TransferItemBank, idxs)
+    TransferItemBank(
+        item_bank.distribution,
+        item_bank.difficulties[idxs],
+        item_bank.discriminations[idxs]
+    )
+end
+@views function subset_view(item_bank::TransferItemBank, idxs)
     TransferItemBank(
         item_bank.distribution,
         item_bank.difficulties[idxs],
@@ -184,6 +191,14 @@ function Base.length(item_bank::SlopeInterceptTransferItemBank)
 end
 
 function subset(item_bank::SlopeInterceptTransferItemBank, idxs)
+    SlopeInterceptTransferItemBank(
+        item_bank.distribution,
+        item_bank.intercepts[idxs],
+        item_bank.slopes[idxs]
+    )
+end
+
+@views function subset_view(item_bank::SlopeInterceptTransferItemBank, idxs)
     SlopeInterceptTransferItemBank(
         item_bank.distribution,
         item_bank.intercepts[idxs],

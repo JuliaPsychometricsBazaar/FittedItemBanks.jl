@@ -19,6 +19,9 @@ DomainType(::OneDimensionItemBankAdapter) = OneDimContinuousDomain()
 function subset(item_bank::OneDimensionItemBankAdapter, idxs)
     OneDimensionItemBankAdapter(subset(item_bank.inner_bank, idxs))
 end
+@views function subset_view(item_bank::OneDimensionItemBankAdapter, idxs)
+    OneDimensionItemBankAdapter(subset_view(item_bank.inner_bank, idxs))
+end
 
 domdims(item_bank::OneDimensionItemBankAdapter) = 0
 

@@ -61,6 +61,14 @@ function subset(item_bank::GuessAndSlipItemBank, idxs)
     )
 end
 
+@views function subset_view(item_bank::GuessAndSlipItemBank, idxs)
+    GuessAndSlipItemBank(
+        item_bank.guesses[idxs],
+        item_bank.slips[idxs],
+        subset_view(item_bank.inner_bank, idxs)
+    )
+end
+
 function guess_slip_indicators(item_bank::GuessAndSlipItemBank)
     return (
         item_bank.guesses isa Zeros,

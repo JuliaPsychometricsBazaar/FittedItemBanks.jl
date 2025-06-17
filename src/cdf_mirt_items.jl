@@ -48,6 +48,13 @@ function subset(item_bank::CdfMirtItemBank, idxs)
         item_bank.discriminations[:, idxs]
     )
 end
+@views function subset_view(item_bank::CdfMirtItemBank, idxs)
+    CdfMirtItemBank(
+        item_bank.distribution,
+        item_bank.difficulties[idxs],
+        item_bank.discriminations[:, idxs]
+    )
+end
 
 function domdims(item_bank::CdfMirtItemBank)
     size(item_bank.discriminations, 1)
@@ -229,6 +236,14 @@ function Base.length(item_bank::SlopeInterceptMirtItemBank)
 end
 
 function subset(item_bank::SlopeInterceptMirtItemBank, idxs)
+    SlopeInterceptMirtItemBank(
+        item_bank.distribution,
+        item_bank.intercepts[idxs],
+        item_bank.slopes[:, idxs]
+    )
+end
+
+@views function subset_view(item_bank::SlopeInterceptMirtItemBank, idxs)
     SlopeInterceptMirtItemBank(
         item_bank.distribution,
         item_bank.intercepts[idxs],

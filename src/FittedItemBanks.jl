@@ -37,7 +37,7 @@ export SimpleItemBankSpec, StdModel2PL, StdModel3PL, StdModel4PL
 
 export basic_item_bank, replace_basic_item_bank
 
-public guess_slip_indicators
+public guess_slip_indicators, subset, subset_view
 
 using Distributions
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
@@ -381,6 +381,15 @@ function $(FUNCTIONNAME)(item_bank::AbstractItemBank, idxs)
 Return a new item bank of the same type, with the items at the given indices.
 """
 function subset end
+
+"""
+```julia
+function $(FUNCTIONNAME)(item_bank::AbstractItemBank, idxs)
+```
+
+Similar to above, but allow the usage of views.
+"""
+function subset_view end
 
 """
 ```julia
