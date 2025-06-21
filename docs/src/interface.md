@@ -42,6 +42,7 @@ MultinomialResponse
 ```@docs
 Base.length(::_DocsItemBank)
 subset
+subset_view
 item_bank_domain
 Base.eachindex(::AbstractItemBank)
 item_params(::AbstractItemBank, ::Any)
