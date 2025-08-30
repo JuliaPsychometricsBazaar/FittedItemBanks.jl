@@ -37,6 +37,8 @@ end
     )
 end
 
+domdims(item_bank::TransferItemBank) = 0
+
 function _norm_abil_1d(θ, difficulty, discrimination)
     (θ - difficulty) * discrimination
 end
@@ -118,34 +120,6 @@ function convert_parameter_type(T::Type, item_bank::TransferItemBank{DistT}) whe
         convert(Vector{T}, item_bank.difficulties),
         convert(Vector{T}, item_bank.discriminations)
     )
-end
-
-function spec_description(item_bank::TransferItemBank, level)
-    if item_bank.distribution == std_logistic
-        if level == :long
-            return "Two parameter unidimensional item bank with standard logistic distribution"
-        elseif level == :short
-            return "2PL"
-        else
-            return "2pl"
-        end
-    elseif item_bank.distribution == normal_scaled_logistic
-        if level == :long
-            return "Two parameter unidimensional item bank with normal scaled logistic distribution"
-        elseif level == :short
-            return "2PLN"
-        else
-            return "2pln"
-        end
-    else
-        if level == :long
-            return "Two parameter unidimensional item bank with unknown transfer function"
-        elseif level == :short
-            return "2P"
-        else
-            return "2p"
-        end
-    end
 end
 
 num_response_categories(ir::ItemResponse{<:TransferItemBank}) = 2
@@ -270,32 +244,38 @@ function item_params(item_bank::SlopeInterceptTransferItemBank, idx)
        slope = item_bank.slopes[idx])
 end
 
-function spec_description(item_bank::SlopeInterceptTransferItemBank, level)
-    if item_bank.distribution == std_logistic
-        if level == :long
-            return "Two parameter unidimensional item bank, slope-intercept parameterization, with standard logistic distribution"
-        elseif level == :short
-            return "2PL"
-        else
-            return "2pl"
-        end
-    elseif item_bank.distribution == normal_scaled_logistic
-        if level == :long
-            return "Two parameter unidimensional item bank, slope-intercept parameterization, with normal scaled logistic distribution"
-        elseif level == :short
-            return "2PLN"
-        else
-            return "2pln"
-        end
+function transfer_function_description(distribution::Distribution)
+    if distribution == std_logistic
+        return "standard logistic transfer function"
+    elseif distribution == normal_scaled_logistic
+        return "normal scaled logistic transfer function"
     else
-        if level == :long
-            return "Two parameter unidimensional item bank, slope-intercept parameterization, with unknown transfer function"
-        elseif level == :short
-            return "2P"
-        else
-            return "2p"
-        end
+        return "transfer function based on " * power_summary(distribution)
     end
+end
+
+function short_spec_descriptions(ppi, distribution)
+    result = "$(ppi)p"
+    if item_bank.distribution == std_logistic
+        result *= "l"
+    elseif item_bank.distribution == normal_scaled_logistic
+        result *= "ln"
+    end
+    return result
+end
+
+variant_description(::Union{TransferItemBank, CdfMirtItemBank}) = "classical parameterization"
+variant_description(::Union{SlopeInterceptTransferItemBank, SlopeInterceptMirtItemBank}) = "slope-intercept parameterization"
+
+function spec_description(item_bank::Union{TransferItemBank, SlopeInterceptTransferItemBank}; level=:long, ppi=2)
+    if level != :long
+        result = short_spec_descriptions(ppi, item_bank.distribution)
+        return level == :short ? uppercase(result) : result
+    end
+    params = uppercasefirst(spelled_out(ppi))
+    variant = variant_description(item_bank)
+    tf_desc = transfer_function_description(item_bank.distribution)
+    return "$params parameter unidimensional item bank, $variant, with $tf_desc"
 end
 
 num_response_categories(ir::ItemResponse{<:SlopeInterceptTransferItemBank}) = 2

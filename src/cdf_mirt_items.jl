@@ -159,27 +159,6 @@ function item_params(item_bank::CdfMirtItemBank, idx)
         discrimination = @view item_bank.discriminations[:, idx])
 end
 
-function spec_description(item_bank::CdfMirtItemBank, level)
-    dim = length(item_bank.difficulties)
-    if item_bank.distribution == normal_scaled_logistic
-        if level == :long
-            return "Two parameter $(dim)-dimensional multidimensional item bank with normal scaled logistic distribution"
-        elseif level == :short
-            return "2PL MIRT $(dim)d"
-        else
-            return "2pl_mirt_$(dim)d"
-        end
-    else
-        if level == :long
-            return "Two parameter $(dim)-dimensional multidimensional item bank with unknown transfer function"
-        elseif level == :short
-            return "2P MIRT $(dim)d"
-        else
-            return "2p_mirt_$(dim)d"
-        end
-    end
-end
-
 """
 ```julia
 struct $(FUNCTIONNAME) <: AbstractItemBank
@@ -322,23 +301,18 @@ function item_params(item_bank::SlopeInterceptMirtItemBank, idx)
        slop = @view item_bank.slopes[:, idx])
 end
 
-function spec_description(item_bank::SlopeInterceptMirtItemBank, level)
-    dim = length(item_bank.slopes)
-    if item_bank.distribution == normal_scaled_logistic
-        if level == :long
-            return "Two parameter $(dim)-dimensional slope-intercept multidimensional item bank with normal scaled logistic distribution"
-        elseif level == :short
-            return "2PL MIRT $(dim)d"
-        else
-            return "2pl_mirt_$(dim)d"
-        end
-    else
-        if level == :long
-            return "Two parameter $(dim)-dimensional slope-intercept multidimensional item bank with unknown transfer function"
-        elseif level == :short
-            return "2P MIRT $(dim)d"
-        else
-            return "2p_mirt_$(dim)d"
-        end
+function spec_description(item_bank::Union{SlopeInterceptMirtItemBank, CdfMirtItemBank}; ppi=2, level=:long)
+    dim = domdims(item_bank)
+    if level != :long
+        result = [
+            short_spec_descriptions(ppi, item_bank.distribution),
+            "mirt",
+            "$(dim)d"
+        ]
+        return level == :short ? uppercase(join(" ", result)) : join("_", result)
     end
+    params = uppercasefirst(spelled_out(ppi))
+    variant = variant_description(item_bank)
+    tf_desc = transfer_function_description(item_bank.distribution)
+    return "$params parameter $(dim)-dimensional multidimensional item bank, $variant, with $tf_desc"
 end

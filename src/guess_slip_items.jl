@@ -154,6 +154,27 @@ log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log(resp(ir, θ))
 log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log.(resp_vec(ir, θ))
 =#
 
+const SimilarTo2PL = Union{CdfMirtItemBank, TransferItemBank, SlopeInterceptTransferItemBank, SlopeInterceptMirtItemBank}
+
+params_per_item(::SimilarTo2PL) = 2
+
+function params_per_item(item_bank::GuessAndSlipItemBank{<: SimilarTo2PL})
+    guesses_zeros, slips_zeros = guess_slip_indicators(item_bank)
+    n = 2
+    if guesses_zeros && slips_zeros
+        n
+    elseif guesses_zeros || slips_zeros
+        n + 1
+    else
+        n + 2
+    end
+end
+
+function spec_description(item_bank::GuessAndSlipItemBank{<: SimilarTo2PL}; level=:long)
+    ppi = params_per_item(item_bank)
+    return spec_description(item_bank.inner_bank; ppi, level)
+end
+
 ## Psuedo-constructors
 
 function FixedGuessItemBank(guess, inner_bank)

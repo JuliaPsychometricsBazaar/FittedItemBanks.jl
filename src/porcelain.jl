@@ -155,7 +155,7 @@ end
     end
 end
 
-function spec_description(spec::SimpleItemBankSpec, level)
+function spec_description(spec::SimpleItemBankSpec; level)
     if spec.response isa MultinomialResponse
         if spec.domain isa OneDimContinuousDomain
             if level == :long
