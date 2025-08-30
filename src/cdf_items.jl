@@ -244,38 +244,4 @@ function item_params(item_bank::SlopeInterceptTransferItemBank, idx)
        slope = item_bank.slopes[idx])
 end
 
-function transfer_function_description(distribution::Distribution)
-    if distribution == std_logistic
-        return "standard logistic transfer function"
-    elseif distribution == normal_scaled_logistic
-        return "normal scaled logistic transfer function"
-    else
-        return "transfer function based on " * power_summary(distribution)
-    end
-end
-
-function short_spec_descriptions(ppi, distribution)
-    result = "$(ppi)p"
-    if item_bank.distribution == std_logistic
-        result *= "l"
-    elseif item_bank.distribution == normal_scaled_logistic
-        result *= "ln"
-    end
-    return result
-end
-
-variant_description(::Union{TransferItemBank, CdfMirtItemBank}) = "classical parameterization"
-variant_description(::Union{SlopeInterceptTransferItemBank, SlopeInterceptMirtItemBank}) = "slope-intercept parameterization"
-
-function spec_description(item_bank::Union{TransferItemBank, SlopeInterceptTransferItemBank}; level=:long, ppi=2)
-    if level != :long
-        result = short_spec_descriptions(ppi, item_bank.distribution)
-        return level == :short ? uppercase(result) : result
-    end
-    params = uppercasefirst(spelled_out(ppi))
-    variant = variant_description(item_bank)
-    tf_desc = transfer_function_description(item_bank.distribution)
-    return "$params parameter unidimensional item bank, $variant, with $tf_desc"
-end
-
 num_response_categories(ir::ItemResponse{<:SlopeInterceptTransferItemBank}) = 2

@@ -300,19 +300,3 @@ function item_params(item_bank::SlopeInterceptMirtItemBank, idx)
     (; intercept = item_bank.intercepts[idx],
        slop = @view item_bank.slopes[:, idx])
 end
-
-function spec_description(item_bank::Union{SlopeInterceptMirtItemBank, CdfMirtItemBank}; ppi=2, level=:long)
-    dim = domdims(item_bank)
-    if level != :long
-        result = [
-            short_spec_descriptions(ppi, item_bank.distribution),
-            "mirt",
-            "$(dim)d"
-        ]
-        return level == :short ? uppercase(join(" ", result)) : join("_", result)
-    end
-    params = uppercasefirst(spelled_out(ppi))
-    variant = variant_description(item_bank)
-    tf_desc = transfer_function_description(item_bank.distribution)
-    return "$params parameter $(dim)-dimensional multidimensional item bank, $variant, with $tf_desc"
-end

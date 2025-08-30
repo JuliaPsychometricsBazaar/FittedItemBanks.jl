@@ -424,49 +424,6 @@ function resp_vec end
 
 function convert_parameter_type end
 
-function power_summary(io::IO, obj::AbstractItemBank; kwargs...)
-    if applicable(spec_description, obj)
-        spec = spec_description(obj)
-        println(io, spec)
-        indent_io = indent(io, 2)
-        nitems = length(obj)
-        println(indent_io, "Number of items: $nitems")
-        dt = DomainType(obj)
-        if dt isa OneDimContinuousDomain
-            domtype = "One-dimensional continuous"
-        elseif dt isa VectorContinuousDomain
-            domtype = "Multi-dimensional continuous"
-        elseif dt isa DiscreteIndexableDomain
-            domtype = "Discrete, indexable"
-        elseif dt isa DiscreteIterableDomain
-            domtype = "Discrete, iterable"
-        else
-            domtype = "Unknown domain type"
-        end
-        println(indent_io, "Domain type: $domtype")
-        if dt isa VectorContinuousDomain
-            ndims_desc = "$ndims"
-            println(indent_io, "Domain dimensions: $ndims_desc")
-        end
-        rt = ResponseType(obj)
-        if rt isa BooleanResponse
-            restype = "Boolean/dichotomous"
-        elseif rt isa MultinomialResponse
-            restype = "Multinomial"
-        else
-            restype = "Unknown response type"
-        end
-        println(indent_io, "Response type: $restype")
-        if rt isa MultinomialResponse
-            nresp = num_response_categories(obj)
-            println(indent_io, "Number of response categories: $nresp")
-        end
-    else
-        # Fallback to show(...)
-        invoke(show, Tuple{IO, MIME"text/plain", Any}, io, MIME("text/plain"), obj)
-    end
-end
-
 include("./adapter.jl")
 include("./cdf_items.jl")
 include("./cdf_mirt_items.jl")
@@ -476,6 +433,7 @@ include("./sampled_items.jl")
 include("./nominal_items.jl")
 include("./guess_slip_items.jl")
 include("./porcelain.jl")
+include("./description.jl")
 include("./DummyData/DummyData.jl")
 include("./precompiles.jl")
 
