@@ -65,23 +65,24 @@ function resp_vec(ir::ItemResponse{<:MonopolyItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
-function item_domain(ir::ItemResponse{<:MonopolyItemBank};
-        mass = default_mass, left_mass = mass, right_mass = mass)
-    right = 1.0 - right_mass
+function _monopoly_invert(ir::ItemResponse{<:MonopolyItemBank}, target)
     logit(x) = log(x / (1.0 - x))
-    function invert(target)
-        poly = Polynomial([
-            ir.item_bank.xis[ir.index] - logit(target), ir.item_bank.bs[ir.index]...])
-        for root in roots(poly)
-            if imag(root) == 0.0
-                return real(root)
-            end
+    poly = Polynomial([
+        ir.item_bank.xis[ir.index] - logit(target), ir.item_bank.bs[ir.index]...])
+    for root in roots(poly)
+        if imag(root) == 0.0
+            return real(root)
         end
     end
-    (
-        invert(left_mass),
-        invert(right)
-    )
+end
+
+function item_response_category_uncertain(ir::ItemResponse{<:MonopolyItemBank}, outcome;
+        mass = default_mass)
+    if outcome
+        return _monopoly_invert(ir, 1.0 - mass)..Inf
+    else
+        return -Inf.._monopoly_invert(ir, mass)
+    end
 end
 
 function resp(ir::ItemResponse{<:MonopolyItemBank}, outcome::Bool, θ)

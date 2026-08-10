@@ -76,7 +76,7 @@ for spec in iterate_simple_item_bank_specs()
     item_bank = dummy(spec)
     @testset "$desc" begin
         test_item_bank(item_bank)
-        if !(item_bank isa NominalItemBank) && !(item_bank isa OneDimensionItemBankAdapter) # TODO
+        if !(item_bank isa OneDimensionItemBankAdapter) # TODO
             test_domain(item_bank; with_zero_symmetric = true,
                 with_thresh = params_per_item(spec.model) == 2)
         end
@@ -121,6 +121,28 @@ end
         Random.default_rng(42),
         BSplineItemBank,
         4
+    )
+    test_item_bank(item_bank)
+    test_domain(item_bank)
+end
+
+@testset "GPCMItemBank" begin
+    item_bank = dummy_item_bank(
+        Random.default_rng(42),
+        GPCMItemBank,
+        4,
+        2
+    )
+    test_item_bank(item_bank)
+    test_domain(item_bank)
+end
+
+@testset "NominalItemBank" begin
+    item_bank = dummy_item_bank(
+        Random.default_rng(42),
+        NominalItemBank,
+        4,
+        2
     )
     test_item_bank(item_bank)
     test_domain(item_bank)

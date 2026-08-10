@@ -9,7 +9,7 @@ dummy_slips(rng, num_questions) = clamp_rand(rng, Normal(0.0, 0.2), num_question
 function dummy_cut_points(rng, num_questions)
     cut_points_ragged = VectorOfArrays{Float64, 1}()
     for _ in 1:num_questions
-        cuts = rand(rng, 1:5)
+        cuts = rand(rng, 2:5)
         push!(cut_points_ragged, rand(rng, std_normal, cuts))
     end
     cut_points_ragged

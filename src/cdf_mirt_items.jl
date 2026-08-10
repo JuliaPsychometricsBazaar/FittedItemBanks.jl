@@ -60,6 +60,8 @@ function domdims(item_bank::CdfMirtItemBank)
     size(item_bank.discriminations, 1)
 end
 
+num_response_categories(ir::ItemResponse{<:CdfMirtItemBank}) = 2
+
 function _mirt_norm_abil(θ, difficulty, discrimination)
     dot((θ .- difficulty), discrimination)
 end
@@ -74,45 +76,11 @@ function resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
-#=function item_domain(ir::ItemResponse{<:CdfMirtItemBank}; reference_point, mass = 1e-3)
-    item_domain(ir, reference_point, mass, mass)
-end=#
-
-#=
-function item_domain(ir::ItemResponse{<:CdfMirtItemBank}; reference_point, left_mass, right_mass)
-    ndims = domdims(ir.item_bank)
-    z_lo = quantile(ir.item_bank.distribution, left_mass)
-    z_hi = quantile(ir.item_bank.distribution, 1.0 - right_mass)
-    lo = fill(Inf, ndims)
-    hi = fill(-Inf, ndims)
-    difficulty = ir.item_bank.difficulties[ir.index]
-    discrimination = @view ir.item_bank.discriminations[:, ir.index]
-    diff_disc = sum(difficulty .* discrimination)
-    function add_unnormed(z, i)
-        # The dot of discrimination and reference point excluding the i-th element
-        ref_disc_rest = sum((rp * d for (j, rp, d) in zip(1:length(reference_point), reference_point, discrimination) if j != i))
-        @info "add_unnormed" z i diff_disc ref_disc_rest discrimination[i]
-        unnormed = (z + diff_disc - ref_disc_rest) / discrimination[i]
-        if unnormed < lo[i]
-            lo[i] = unnormed
-        end
-        if unnormed > hi[i]
-            hi[i] = unnormed
-        end
-    end
-    for i in 1:ndims
-        add_unnormed(z_lo, i)
-        add_unnormed(z_hi, i)
-    end
-    return (lo, hi)
-end
-=#
-
 function item_domain(
-        ir::ItemResponse{<:CdfMirtItemBank}; reference_point, mass = default_mass, left_mass = mass, right_mass = mass)
+        ir::ItemResponse{<:CdfMirtItemBank}; reference_point, mass = default_mass)
     ndims = domdims(ir.item_bank)
-    z_lo = quantile(ir.item_bank.distribution, left_mass)
-    z_hi = quantile(ir.item_bank.distribution, 1.0 - right_mass)
+    z_lo = quantile(ir.item_bank.distribution, mass)
+    z_hi = quantile(ir.item_bank.distribution, 1.0 - mass)
     lo = fill(Inf, ndims)
     hi = fill(-Inf, ndims)
     difficulty = ir.item_bank.difficulties[ir.index]
@@ -136,6 +104,32 @@ function item_domain(
     update_bounds!(nearest_point(z_lo))
     update_bounds!(nearest_point(z_hi))
     return (lo, hi)
+end
+
+function item_response_category_uncertain(ir::ItemResponse{<:CdfMirtItemBank}, outcome;
+        reference_point, mass = default_mass)
+    a = @view ir.item_bank.discriminations[:, ir.index]
+    difficulty = ir.item_bank.difficulties[ir.index]
+    c0 = dot(reference_point, a) - sum(difficulty .* a)
+    dist = ir.item_bank.distribution
+    is_true = outcome
+    z = is_true ? quantile(dist, 1.0 - mass) : quantile(dist, mass)
+    acc = Vector{IntervalUnion}(undef, length(a))
+    for (d, a_d) in pairs(a)
+        if a_d != 0
+            t = (z - c0) / a_d
+            if is_true == (a_d > 0)
+                acc[d] = IntervalUnion((Interval(t, Inf),))
+            else
+                acc[d] = IntervalUnion((Interval(-Inf, t),))
+            end
+        elseif is_true ? c0 >= z : c0 <= z
+            acc[d] = IntervalUnion((Interval(-Inf, Inf),))
+        else
+            acc[d] = IntervalUnion(())
+        end
+    end
+    return acc
 end
 
 function resp(ir::ItemResponse{<:CdfMirtItemBank}, outcome::Bool, θ)

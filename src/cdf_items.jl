@@ -62,23 +62,15 @@ function resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
-#=
-function density_vec(ir::ItemResponse{<:TransferItemBank}, θ)
-    density1 = density(ir, θ)
-    SVector(-density1, density1)
-end
-=#
-
-#=function item_domain(ir::ItemResponse, mass = 1e-3)
-    item_domain(ir, mass, mass)
-end=#
-
-function item_domain(ir::ItemResponse{<:TransferItemBank};
-        mass = default_mass, left_mass = mass, right_mass = mass)
-    (
-        unnorm_abil(ir, quantile(ir.item_bank.distribution, left_mass)),
-        unnorm_abil(ir, quantile(ir.item_bank.distribution, 1.0 - right_mass))
-    )
+function item_response_category_uncertain(ir::ItemResponse{<:TransferItemBank}, outcome;
+        mass = default_mass)
+    if outcome
+        lo = unnorm_abil(ir, quantile(ir.item_bank.distribution, 1.0 - mass))
+        return lo..Inf
+    else
+        hi = unnorm_abil(ir, quantile(ir.item_bank.distribution, mass))
+        return -Inf..hi
+    end
 end
 
 function maxabilresp(::ItemResponse{<:TransferItemBank})
@@ -203,12 +195,15 @@ function resp_vec(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
-function item_domain(ir::ItemResponse{<:SlopeInterceptTransferItemBank};
-        mass = default_mass, left_mass = mass, right_mass = mass)
-    (
-        unnorm_abil(ir, quantile(ir.item_bank.distribution, left_mass)),
-        unnorm_abil(ir, quantile(ir.item_bank.distribution, 1.0 - right_mass))
-    )
+function item_response_category_uncertain(ir::ItemResponse{<:SlopeInterceptTransferItemBank},
+        outcome; mass = default_mass)
+    if outcome
+        lo = unnorm_abil(ir, quantile(ir.item_bank.distribution, 1.0 - mass))
+        return lo..Inf
+    else
+        hi = unnorm_abil(ir, quantile(ir.item_bank.distribution, mass))
+        return -Inf..hi
+    end
 end
 
 function maxabilresp(::ItemResponse{<:SlopeInterceptTransferItemBank})

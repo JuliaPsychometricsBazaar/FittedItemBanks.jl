@@ -11,6 +11,7 @@ import ..OneDimContinuousDomain, ..VectorContinuousDomain, ..BooleanResponse,
 import ..GuessItemBank, ..GuessAndSlipItemBank
 import ..ItemResponse, ..resp
 import ..MonopolyItemBank, ..BSplineItemBank
+import ..GPCMItemBank, ..NominalItemBank
 import ..FittedItemBanks: FittedItemBanks
 
 export dummy_item_bank, dummy_full
@@ -26,5 +27,6 @@ clamp_rand(rng, dist, dims...) = clamp.(rand(rng, dist, dims...), 0.0, 0.4)
 
 include("./transfer_based.jl")
 include("./flexible.jl")
+include("./nominal.jl")
 
 end
