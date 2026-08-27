@@ -43,6 +43,7 @@ using Distributions
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
 using ArraysOfArrays: VectorOfArrays, VectorOfSimilarVectors
+using FillArrays: Fill, Zeros
 using StaticArrays: SVector
 import PsychometricsBazaarBase: power_summary
 using PsychometricsBazaarBase.IndentWrappers: indent
