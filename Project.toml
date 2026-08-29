@@ -24,7 +24,7 @@ SpelledOut = "4728c690-e668-4265-bc0d-51a8c0f93067"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-ArraysOfArrays = "0.6"
+ArraysOfArrays = "0.6, 1"
 BSplines = "0.3.3"
 ConstructionBase = "1.5.8"
 Distributions = "^0.25.49"

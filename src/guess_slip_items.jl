@@ -16,7 +16,7 @@ struct GuessAndSlipItemBank{
 
     function GuessAndSlipItemBank(guesses, slips, inner_bank)
         if !(ResponseType(inner_bank) isa BooleanResponse)
-            error("Guess/slip item banks can only wrap item banks with a ResponseType of BooleanResponse, not $(ResponseType(item_bank))")
+            error("Guess/slip item banks can only wrap item banks with a ResponseType of BooleanResponse, not $(ResponseType(inner_bank))")
         end
         param_t = eltype(guesses)
         # XXX: Could also promote two to match rather than this check

@@ -50,7 +50,8 @@ end
 
 function NominalItemBank(ranks::Matrix{Float64}, discriminations::Matrix{Float64},
         cut_points::Matrix{Float64})
-    NominalItemBank(nestedview(ranks), discriminations, nestedview(cut_points))
+    NominalItemBank(VectorOfSimilarVectors(ranks), discriminations,
+        VectorOfSimilarVectors(cut_points))
 end
 
 function NominalItemBank(ranks, discriminations::Vector{Float64}, cut_points)
@@ -86,7 +87,7 @@ function GPCMItemBank(discriminations, cut_points::PerCategoryFloat)
 end
 
 function GPCMItemBank(discriminations, cut_points::Matrix{Float64})
-    GPCMItemBank(discriminations, nestedview(cut_points))
+    GPCMItemBank(discriminations, VectorOfSimilarVectors(cut_points))
 end
 
 DomainType(::NominalItemBank) = VectorContinuousDomain()

@@ -42,7 +42,8 @@ public guess_slip_indicators, subset, subset_view
 using Distributions
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
 using Lazy: @forward
-using ArraysOfArrays: VectorOfArrays, nestedview
+using ArraysOfArrays: VectorOfArrays, VectorOfSimilarVectors
+using FillArrays: Fill, Zeros
 using StaticArrays: SVector
 import PsychometricsBazaarBase: power_summary
 using PsychometricsBazaarBase.IndentWrappers: indent
@@ -397,8 +398,7 @@ function item_domain(ir::ItemResponse; kwargs...)
     item_domain(DomainType(ir.item_bank), ir; kwargs...)
 end
 
-VectorOfVectorsFloat64 = VectorOfVectors{
-    Float64, Vector{Float64}, Vector{Int64}, Vector{Tuple{}}}
+VectorOfVectorsFloat64 = typeof(VectorOfVectors{Float64}())
 
 """
 ```julia

@@ -53,9 +53,9 @@ end
 
 function short_spec_descriptions(ppi, distribution)
     result = "$(ppi)p"
-    if item_bank.distribution == std_logistic
+    if distribution == std_logistic
         result *= "l"
-    elseif item_bank.distribution == normal_scaled_logistic
+    elseif distribution == normal_scaled_logistic
         result *= "ln"
     end
     return result
