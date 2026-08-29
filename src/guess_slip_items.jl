@@ -134,8 +134,9 @@ function resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
 
-function item_domain(ir::ItemResponse{<:GuessAndSlipItemBank}; kwargs...)
-    item_domain(inner_item_response(ir); kwargs...)
+function item_response_category_uncertain(ir::ItemResponse{<:GuessAndSlipItemBank},
+        resp_cat; kwargs...)
+    item_response_category_uncertain(inner_item_response(ir), resp_cat; kwargs...)
 end
 
 function maxabilresp(ir::ItemResponse{<:GuessAndSlipItemBank})

@@ -58,8 +58,14 @@ using ResumableFunctions
 using Polynomials
 using ConstructionBase
 using SpelledOut
+using IntervalSets
+using PsychometricsBazaarBase.IntervalUnions
 
 const default_mass = 1e-2
+
+# IntervalUnions' own infimum/supremum are broken (calls undefined `infinimum`)
+interval_union_infimum(iu::IntervalUnion) = minimum(IntervalSets.infimum, iu.ints)
+interval_union_supremum(iu::IntervalUnion) = maximum(IntervalSets.supremum, iu.ints)
 
 """
 $(TYPEDEF)
@@ -310,31 +316,24 @@ function item_bank_domain(
         thresh = nothing
 )
     if length(item_bank) == 0
-        (NaN, NaN)
+        return (NaN, NaN)
     end
-    cur_lo = Inf
-    cur_hi = -Inf
+    acc = IntervalUnion(())
     for item_idx in items
         ir = ItemResponse(item_bank, item_idx)
         if thresh === nothing
-            item_lo, item_hi = item_domain(ir)
+            interval = item_domain(ir)
         else
-            item_lo, item_hi = item_domain(ir; mass = thresh)
+            interval = item_domain(ir; mass = thresh)
         end
-        if item_lo < cur_lo
-            cur_lo = item_lo
-        end
-        if item_hi > cur_hi
-            cur_hi = item_hi
-        end
-        #cur_lo = search_per_dim(DomainType(item_bank), ir, lo, cur_lo, cur_lo, minabilresp(ir), thresh)
-        #cur_hi = search_per_dim(DomainType(item_bank), ir, cur_hi, hi, cur_hi, maxabilresp(ir), thresh)
+        acc = union(acc, interval)
     end
+    lo, hi = interval_union_infimum(acc), interval_union_supremum(acc)
     if zero_symmetric
-        dist = max(abs(cur_lo), abs(cur_hi))
+        dist = max(abs(lo), abs(hi))
         (-dist, dist)
     else
-        (cur_lo, cur_hi)
+        (lo, hi)
     end
 end
 
@@ -350,31 +349,53 @@ function item_bank_domain(
     if reference_point === nothing
         reference_point = zeros(ndims)
     end
-    cur_lo = fill(Inf, ndims)
-    cur_hi = fill(-Inf, ndims)
+    acc = IntervalUnion[IntervalUnion(()) for _ in 1:ndims]
     for item_idx in items
         ir = ItemResponse(item_bank, item_idx)
         if thresh === nothing
-            item_lo, item_hi = item_domain(ir; reference_point = reference_point)
+            per_dim = item_domain(DomainType(item_bank), ir; reference_point = reference_point)
         else
-            item_lo, item_hi = item_domain(
-                ir; reference_point = reference_point, mass = thresh)
+            per_dim = item_domain(
+                DomainType(item_bank), ir; reference_point = reference_point, mass = thresh)
         end
-        for idx in 1:ndims
-            if item_lo[idx] < cur_lo[idx]
-                cur_lo[idx] = item_lo[idx]
-            end
-            if item_hi[idx] > cur_hi[idx]
-                cur_hi[idx] = item_hi[idx]
-            end
+        for d in 1:ndims
+            acc[d] = union(acc[d], per_dim[d])
         end
     end
+    lo = [interval_union_infimum(s) for s in acc]
+    hi = [interval_union_supremum(s) for s in acc]
     if zero_symmetric
-        dist = max.(abs.(cur_lo), abs.(cur_hi))
+        dist = max.(abs.(lo), abs.(hi))
         (-dist, dist)
     else
-        (cur_lo, cur_hi)
+        (lo, hi)
     end
+end
+
+function item_domain(::OneDimContinuousDomain, ir::ItemResponse; mass = default_mass)
+    acc = IntervalUnion(())
+    for resp_cat in responses(ir)
+        acc = union(acc, item_response_category_uncertain(ir, resp_cat; mass = mass))
+    end
+    return complement(acc)
+end
+
+function item_domain(::VectorContinuousDomain, ir::ItemResponse;
+        reference_point, mass = default_mass)
+    nd = domdims(ir.item_bank)
+    acc = IntervalUnion[IntervalUnion(()) for _ in 1:nd]
+    for resp_cat in responses(ir)
+        per_dim = item_response_category_uncertain(ir, resp_cat;
+            reference_point = reference_point, mass = mass)
+        for d in 1:nd
+            acc[d] = union(acc[d], per_dim[d])
+        end
+    end
+    return [complement(a) for a in acc]
+end
+
+function item_domain(ir::ItemResponse; kwargs...)
+    item_domain(DomainType(ir.item_bank), ir; kwargs...)
 end
 
 VectorOfVectorsFloat64 = typeof(VectorOfVectors{Float64}())

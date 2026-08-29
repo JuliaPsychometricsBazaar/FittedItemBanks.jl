@@ -133,18 +133,40 @@ function resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
     outs ./ sum(outs)
 end
 
-# TODO
-function item_domain(ir::ItemResponse{<:NominalItemBank}; reference_point,
-        mass = default_mass, left_mass = mass, right_mass = mass)
-    error("Not implemented")
-    #=
-    TODO:
-    z = (k(a \dot θ + d)
-    z_i - logsumexp z = log 0.99
-    Hopefully a hyperplan in \theta
-    Find closest point to reference_point
-    Try for each category i
-    =#
+function item_response_category_uncertain(ir::ItemResponse{<:NominalItemBank}, resp_cat;
+        reference_point, mass = default_mass)
+    aks = ir.item_bank.ranks[ir.index]
+    as = @view ir.item_bank.discriminations[:, ir.index]
+    ds = ir.item_bank.cut_points[ir.index]
+    c = log((num_ranks(ir) - 1) * (1 - mass) / mass)
+    at_ref = dot(as, reference_point)
+    acc = Vector{IntervalUnion}(undef, length(as))
+    for (d, a_d) in pairs(as)
+        s_k = aks[resp_cat] * a_d
+        b_k = aks[resp_cat] * (at_ref + ds[resp_cat])
+        t_lo = -Inf
+        t_hi = Inf
+        ok = true
+        for j in eachindex(aks)
+            j == resp_cat && continue
+            s_j = aks[j] * a_d
+            diff_c = c - b_k + aks[j] * (at_ref + ds[j])
+            if s_k > s_j
+                t_lo = max(t_lo, diff_c / (s_k - s_j))
+            elseif s_k < s_j
+                t_hi = min(t_hi, diff_c / (s_k - s_j))
+            elseif diff_c > 0
+                ok = false
+                break
+            end
+        end
+        if ok && t_lo <= t_hi
+            acc[d] = IntervalUnion((Interval(t_lo, t_hi),))
+        else
+            acc[d] = IntervalUnion(())
+        end
+    end
+    return acc
 end
 
 function num_ranks(ir::ItemResponse{<:NominalItemBank})

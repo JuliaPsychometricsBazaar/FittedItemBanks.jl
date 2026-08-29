@@ -41,14 +41,15 @@ function resp_vec(ir::ItemResponse{<:BSplineItemBank}, θ)
     SVector(1.0 - resp1, resp1)
 end
 
-function item_domain(ir::ItemResponse{<:BSplineItemBank};
-        mass = default_mass, left_mass = mass, right_mass = mass)
+function item_response_category_uncertain(ir::ItemResponse{<:BSplineItemBank}, outcome;
+        mass = default_mass)
     # TODO: Default to this for now; should take into account the left/right mass
     knts = knots(ir.item_bank.bases[ir.index])
-    return (
-        knts[1],
-        knts[end]
-    )
+    if outcome
+        return knts[end]..Inf
+    else
+        return -Inf..knts[1]
+    end
 end
 
 function resp(ir::ItemResponse{<:BSplineItemBank}, outcome::Bool, θ)
