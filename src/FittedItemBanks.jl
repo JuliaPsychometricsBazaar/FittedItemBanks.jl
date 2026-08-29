@@ -381,8 +381,11 @@ function item_domain(::OneDimContinuousDomain, ir::ItemResponse; mass = default_
 end
 
 function item_domain(::VectorContinuousDomain, ir::ItemResponse;
-        reference_point, mass = default_mass)
+        reference_point=nothing, mass = default_mass)
     nd = domdims(ir.item_bank)
+    if reference_point === nothing
+        reference_point = zeros(nd)
+    end
     acc = IntervalUnion[IntervalUnion(()) for _ in 1:nd]
     for resp_cat in responses(ir)
         per_dim = item_response_category_uncertain(ir, resp_cat;
