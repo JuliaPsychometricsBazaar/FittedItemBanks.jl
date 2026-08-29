@@ -58,7 +58,7 @@ using Polynomials
 using ConstructionBase
 using SpelledOut
 using IntervalSets
-using IntervalUnions
+using PsychometricsBazaarBase.IntervalUnions
 
 const default_mass = 1e-2
 
