@@ -36,4 +36,21 @@ function dummy_item_bank(
     return BSplineItemBank(bases, params)
 end
 
-dummy_item_bank(type::Type, args...) = dummy_item_bank(Random.default_rng(), type, args...)
+function convert_dummy_item_bank(
+        ::Type{DichotomousPointsItemBank},
+        item_bank,
+        xs
+)
+    gridify(item_bank, collect(Float64, xs))
+end
+
+function convert_dummy_item_bank(
+        ::Type{DichotomousSmoothedItemBank},
+        item_bank,
+        xs;
+        bandwidth = 0.5
+)
+    points = convert_dummy_item_bank(DichotomousPointsItemBank, item_bank, xs)
+    smoother = KernelSmoother(gauss_kern, fill(Float64(bandwidth), length(points)))
+    DichotomousSmoothedItemBank(points, smoother)
+end

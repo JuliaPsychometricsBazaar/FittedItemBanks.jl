@@ -74,10 +74,6 @@ function dummy_item_bank(
     )
 end
 
-function dummy_item_bank(spec::SimpleItemBankSpec, args...)
-    dummy_item_bank(Random.default_rng(), spec, args...)
-end
-
 function item_bank_to_full_dummy(rng, item_bank, num_testees)
     (item_bank, abilities, responses) = mirt_item_bank_to_full_dummy(
         rng, item_bank, num_testees, 1; squeeze = true)
