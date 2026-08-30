@@ -126,6 +126,36 @@ end
     test_domain(item_bank)
 end
 
+@testset "DichotomousSmoothedItemBank" begin
+    rng = Random.default_rng(42)
+    source_bank = dummy_item_bank(
+        rng,
+        SimpleItemBankSpec(StdModel2PL(), OneDimContinuousDomain(), BooleanResponse()),
+        4
+    )
+    item_bank = convert_dummy_item_bank(
+        DichotomousSmoothedItemBank,
+        source_bank,
+        range(-6.0, 6.0; length = 121);
+        bandwidth = 0.4
+    )
+
+    @test ItemResponse(item_bank, 1) isa ItemResponse{
+        DichotomousSmoothedItemBank{
+            DichotomousPointsItemBank{Vector{Float64}},
+            KernelSmoother{typeof(FittedItemBanks.gauss_kern)}
+        }
+    }
+    test_item_bank(item_bank)
+    test_domain(item_bank)
+    @test length(subset(item_bank, [1, 3])) == 2
+
+    ir = ItemResponse(item_bank, 1)
+    @test 0 <= resp(ir, 0.5) <= 1
+    @test length(minabilresp(ir)) == length(maxabilresp(ir)) ==
+          num_response_categories(ir)
+end
+
 @testset "GPCMItemBank" begin
     item_bank = dummy_item_bank(
         Random.default_rng(42),
