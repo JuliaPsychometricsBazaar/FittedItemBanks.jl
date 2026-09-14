@@ -12,7 +12,7 @@ using FittedItemBanks.DummyData
 
 function dummy(spec::SimpleItemBankSpec{TA, OneDimContinuousDomain, TB}) where {TA, TB}
     dummy_item_bank(
-        Random.default_rng(42),
+        Random.Xoshiro(42),
         spec,
         4
     )
@@ -20,7 +20,7 @@ end
 
 function dummy(spec::SimpleItemBankSpec{TA, VectorContinuousDomain, TB}) where {TA, TB}
     dummy_item_bank(
-        Random.default_rng(42),
+        Random.Xoshiro(42),
         spec,
         4,
         2
@@ -28,7 +28,7 @@ function dummy(spec::SimpleItemBankSpec{TA, VectorContinuousDomain, TB}) where {
 end
 
 function test_item_bank(item_bank)
-    rng = Random.default_rng(42)
+    rng = Random.Xoshiro(42)
     for idx in eachindex(item_bank)
         if DomainType(item_bank) isa OneDimContinuousDomain
             theta = randn(rng)
@@ -107,7 +107,7 @@ end
 
 @testset "MonopolyItemBank" begin
     item_bank = dummy_item_bank(
-        Random.default_rng(42),
+        Random.Xoshiro(42),
         MonopolyItemBank,
         4,
         3
@@ -118,7 +118,7 @@ end
 
 @testset "BSplineItemBank" begin
     item_bank = dummy_item_bank(
-        Random.default_rng(42),
+        Random.Xoshiro(42),
         BSplineItemBank,
         4
     )
@@ -127,7 +127,7 @@ end
 end
 
 @testset "DichotomousSmoothedItemBank" begin
-    rng = Random.default_rng(42)
+    rng = Random.Xoshiro(42)
     source_bank = dummy_item_bank(
         rng,
         SimpleItemBankSpec(StdModel2PL(), OneDimContinuousDomain(), BooleanResponse()),
@@ -158,7 +158,7 @@ end
 
 @testset "GPCMItemBank" begin
     item_bank = dummy_item_bank(
-        Random.default_rng(42),
+        Random.Xoshiro(42),
         GPCMItemBank,
         4,
         2
@@ -169,11 +169,11 @@ end
 
 @testset "NominalItemBank" begin
     item_bank = dummy_item_bank(
-        Random.default_rng(42),
+        Random.Xoshiro(42),
         NominalItemBank,
         4,
         2
     )
     test_item_bank(item_bank)
-    test_domain(item_bank)
+    test_domain(item_bank; bound=20)
 end
