@@ -38,8 +38,8 @@ function resp_vec(ir::ItemResponse{<:OneDimensionItemBankAdapter}, θ)
 end
 
 function item_domain(ir::ItemResponse{<:OneDimensionItemBankAdapter}; kwargs...)
-    (lo, hi) = item_domain(inner_item_response(ir); kwargs...)
-    (lo[1], hi[1])
+    domain = item_domain(inner_item_response(ir); kwargs...)
+    return domain[1]
 end
 
 function num_response_categories(ir::ItemResponse{<:OneDimensionItemBankAdapter})

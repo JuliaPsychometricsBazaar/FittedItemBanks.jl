@@ -46,12 +46,20 @@ function Base.length(item_bank::DichotomousPointsItemBank)
     size(item_bank.ys, 2)
 end
 
+function subset(item_bank::DichotomousPointsItemBank, idxs)
+    DichotomousPointsItemBank(item_bank.xs, item_bank.ys[:, idxs])
+end
+
+function subset_view(item_bank::DichotomousPointsItemBank, idxs)
+    subset(item_bank, idxs)
+end
+
 function item_bank_xs(item_bank::DichotomousPointsItemBank)
     item_bank.xs
 end
 
-function item_domain(ir::ItemResponse{<:DichotomousPointsItemBank})
-    (ir.item_bank.xs[1], ir.item_bank.xs[end])
+function item_domain(ir::ItemResponse{<:DichotomousPointsItemBank}; kwargs...)
+    ir.item_bank.xs[1]..ir.item_bank.xs[end]
 end
 
 function item_xs(ir::ItemResponse{<:DichotomousPointsItemBank})
@@ -83,8 +91,8 @@ function Base.length(item_bank::MultiGridDichotomousPointsItemBank)
     length(item_bank.ys)
 end
 
-function item_domain(ir::ItemResponse{<:MultiGridDichotomousPointsItemBank})
-    (ir.item_bank.xs[ir.index][1], ir.item_bank.xs[ir.index][end])
+function item_domain(ir::ItemResponse{<:MultiGridDichotomousPointsItemBank}; kwargs...)
+    ir.item_bank.xs[ir.index][1]..ir.item_bank.xs[ir.index][end]
 end
 
 function item_xs(ir::ItemResponse{<:MultiGridDichotomousPointsItemBank})
@@ -143,6 +151,7 @@ end
 
 DomainType(::DichotomousSmoothedItemBank) = OneDimContinuousDomain()
 ResponseType(::DichotomousSmoothedItemBank) = BooleanResponse()
+domdims(::DichotomousSmoothedItemBank) = 0
 function inner_item_response(ir::ItemResponse{<:DichotomousSmoothedItemBank})
     ItemResponse(ir.item_bank.inner_bank, ir.index)
 end
@@ -151,13 +160,43 @@ function Base.length(item_bank::DichotomousSmoothedItemBank)
     length(item_bank.inner_bank)
 end
 
-function item_domain(ir::ItemResponse{<:DichotomousSmoothedItemBank})
-    item_domain(ItemResponse(ir.item_bank.inner_bank, ir.index))
+function subset(item_bank::DichotomousSmoothedItemBank, idxs)
+    DichotomousSmoothedItemBank(
+        subset(item_bank.inner_bank, idxs),
+        _subset_smoother(item_bank.smoother, idxs)
+    )
+end
+
+function subset_view(item_bank::DichotomousSmoothedItemBank, idxs)
+    DichotomousSmoothedItemBank(
+        subset_view(item_bank.inner_bank, idxs),
+        _subset_smoother(item_bank.smoother, idxs)
+    )
+end
+
+function _subset_smoother(smoother::KernelSmoother, idxs)
+    KernelSmoother(smoother.kernel, smoother.bandwidths[idxs])
+end
+
+_subset_smoother(smoother::NearestNeighborSmoother, _) = smoother
+
+function item_domain(ir::ItemResponse{<:DichotomousSmoothedItemBank}; kwargs...)
+    item_domain(ItemResponse(ir.item_bank.inner_bank, ir.index); kwargs...)
 end
 
 function resp_vec(ir::ItemResponse{<:DichotomousSmoothedItemBank}, θ)
     resp1 = resp(ir, θ)
     SVector(1.0 - resp1, resp1)
+end
+
+num_response_categories(::ItemResponse{<:DichotomousSmoothedItemBank}) = 2
+
+function minabilresp(ir::ItemResponse{<:DichotomousSmoothedItemBank})
+    resp_vec(ir, first(item_xs(inner_item_response(ir))))
+end
+
+function maxabilresp(ir::ItemResponse{<:DichotomousSmoothedItemBank})
+    resp_vec(ir, last(item_xs(inner_item_response(ir))))
 end
 
 function resp(ir::ItemResponse{<:DichotomousSmoothedItemBank}, outcome::Bool, θ)
