@@ -17,7 +17,7 @@ This item bank implements the nominal model. [The Graded Partial Credit Model
 Currently, this item bank only supports the normal scaled logistic as the
 characteristic/transfer function.
 
-See also: [GPCMItemBank](@ref) (psuedo-constructor)
+See also: [`GPCMItemBank`](@ref) (psuedo-constructor)
 
 ### References:
 
@@ -63,7 +63,7 @@ end
 $(FUNCTIONNAME)(discriminations, cut_points) -> NominalItemBank
 ```
 
-This psuedo-constructor creates a [NominalItemBank](@ref) implementing the Graded
+This psuedo-constructor creates a [`NominalItemBank`](@ref) implementing the Graded
 Partial Credit Model (GPCM).
 
 ### References:

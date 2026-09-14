@@ -442,7 +442,7 @@ $(FUNCTIONNAME)(ir::ItemResponse, θ) -> AbstractVector{Float64}
 Return the vector value of the item response function for the item response
 `ir`, the outcome `outcome` and the ability values `θ`.
 
-The outcome at each index corresponds with the indices returned by the [responses](@ref) function.
+The outcome at each index corresponds with the indices returned by the [`responses`](@ref) function.
 """
 function resp_vec end
 
