@@ -1,6 +1,6 @@
 name = "FittedItemBanks"
 uuid = "3f797b09-34e4-41d7-acf6-3302ae3248a5"
-version = "0.7.4"
+version = "0.7.5"
 authors = ["Frankie Robertson <frankie@robertson.name>"]
 
 [workspace]
