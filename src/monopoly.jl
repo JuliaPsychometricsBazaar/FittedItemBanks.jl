@@ -55,6 +55,7 @@ end
 
 DomainType(::MonopolyItemBank) = OneDimContinuousDomain()
 ResponseType(::MonopolyItemBank) = BooleanResponse()
+domdims(::MonopolyItemBank) = 0
 
 function Base.length(item_bank::MonopolyItemBank)
     length(item_bank.xis)
@@ -94,10 +95,28 @@ function resp(ir::ItemResponse{<:MonopolyItemBank}, outcome::Bool, θ)
     end
 end
 
+@inline function _monopoly_logit(ir::ItemResponse{<:MonopolyItemBank}, θ)
+    return muladd(θ, evalpoly(θ, ir.item_bank.bs[ir.index]), ir.item_bank.xis[ir.index])
+end
+
 function resp(ir::ItemResponse{<:MonopolyItemBank}, θ)
-    m = muladd(θ, evalpoly(θ, ir.item_bank.bs[ir.index]), ir.item_bank.xis[ir.index])
+    m = _monopoly_logit(ir, θ)
     return 1.0 / (1.0 + exp(-m))
 end
+
+function log_resp(ir::ItemResponse{<:MonopolyItemBank}, outcome::Bool, θ)
+    m = _monopoly_logit(ir, θ)
+    return outcome ? loglogistic(m) : loglogistic(-m)
+end
+
+log_resp(ir::ItemResponse{<:MonopolyItemBank}, θ) = log_resp(ir, true, θ)
+
+function log_resp_vec(ir::ItemResponse{<:MonopolyItemBank}, θ)
+    m = _monopoly_logit(ir, θ)
+    return SVector(loglogistic(-m), loglogistic(m))
+end
+
+num_response_categories(ir::ItemResponse{<:MonopolyItemBank}) = 2
 
 # TODO
 #function item_domain(ir::ItemResponse{<:MonopolyItemBank}; left_mass=default_mass, right_mass=default_mass)

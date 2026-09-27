@@ -149,11 +149,41 @@ function minabilresp(ir::ItemResponse{<:GuessAndSlipItemBank})
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
 
-#=
-log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ) = log(resp(ir, response, θ))
-log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log(resp(ir, θ))
-log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log.(resp_vec(ir, θ))
-=#
+# Combine an inner log-probability with the guess/slip affine transform.
+#
+# The outer probability for an outcome with offset `offset` (guess for a true
+# response, slip for a false response) and `scale = 1 - guess - slip` is
+# `offset + scale * exp(inner_logp)`. Working in log space with `logaddexp`
+# avoids reconstructing the inner probability, so this stays finite even when
+# the inner probability underflows.
+@inline function _log_transform_irf(offset, scale, inner_logp)
+    # The result is a log-probability and so is at most zero. `logaddexp` can
+    # return a tiny positive value when `offset + scale` rounds to exactly one.
+    logp = logaddexp(log(float(offset)), log(float(scale)) + inner_logp)
+    return min(logp, zero(logp))
+end
+
+function log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ)
+    guess = ir.item_bank.guesses[ir.index]
+    slip = ir.item_bank.slips[ir.index]
+    scale = irf_size(guess, slip)
+    offset = response ? guess : slip
+    inner_logp = log_resp(inner_item_response(ir), response, θ)
+    return _log_transform_irf(offset, scale, inner_logp)
+end
+
+log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log_resp(ir, true, θ)
+
+function log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
+    guess = ir.item_bank.guesses[ir.index]
+    slip = ir.item_bank.slips[ir.index]
+    scale = irf_size(guess, slip)
+    inner = log_resp_vec(inner_item_response(ir), θ)
+    return SVector(
+        _log_transform_irf(slip, scale, inner[1]),
+        _log_transform_irf(guess, scale, inner[2])
+    )
+end
 
 const SimilarTo2PL = Union{CdfMirtItemBank, TransferItemBank, SlopeInterceptTransferItemBank, SlopeInterceptMirtItemBank}
 

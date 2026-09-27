@@ -53,6 +53,8 @@ item_params(::AbstractItemBank, ::Any)
 ```@docs
 resp
 resp_vec
+log_resp
+log_resp_vec
 responses
 ```
 

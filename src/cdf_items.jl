@@ -116,6 +116,25 @@ end
 
 num_response_categories(ir::ItemResponse{<:TransferItemBank}) = 2
 
+function log_resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
+    nθ = norm_abil(ir, θ)
+    return SVector(
+        logccdf(ir.item_bank.distribution, nθ),
+        logcdf(ir.item_bank.distribution, nθ)
+    )
+end
+
+function log_resp(ir::ItemResponse{<:TransferItemBank}, outcome::Bool, θ)
+    nθ = norm_abil(ir, θ)
+    if outcome
+        logcdf(ir.item_bank.distribution, nθ)
+    else
+        logccdf(ir.item_bank.distribution, nθ)
+    end
+end
+
+log_resp(ir::ItemResponse{<:TransferItemBank}, θ) = log_resp(ir, true, θ)
+
 """
 ```julia
 struct $(FUNCTIONNAME) <: AbstractItemBank
@@ -151,6 +170,7 @@ end
 
 DomainType(::SlopeInterceptTransferItemBank) = OneDimContinuousDomain()
 ResponseType(::SlopeInterceptTransferItemBank) = BooleanResponse()
+domdims(item_bank::SlopeInterceptTransferItemBank) = 0
 
 function Base.length(item_bank::SlopeInterceptTransferItemBank)
     length(item_bank.intercepts)
@@ -240,3 +260,22 @@ function item_params(item_bank::SlopeInterceptTransferItemBank, idx)
 end
 
 num_response_categories(ir::ItemResponse{<:SlopeInterceptTransferItemBank}) = 2
+
+function log_resp_vec(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    nθ = norm_abil(ir, θ)
+    return SVector(
+        logccdf(ir.item_bank.distribution, nθ),
+        logcdf(ir.item_bank.distribution, nθ)
+    )
+end
+
+function log_resp(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, outcome::Bool, θ)
+    nθ = norm_abil(ir, θ)
+    if outcome
+        logcdf(ir.item_bank.distribution, nθ)
+    else
+        logccdf(ir.item_bank.distribution, nθ)
+    end
+end
+
+log_resp(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ) = log_resp(ir, true, θ)

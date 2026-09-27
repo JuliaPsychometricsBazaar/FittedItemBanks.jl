@@ -21,6 +21,8 @@ quad_kern(u) = u >= -1 && u <= 1 ? 1.0 - u^2 : 0.0
 
 abstract type PointsItemBank <: AbstractItemBank end
 
+num_response_categories(::ItemResponse{<:PointsItemBank}) = 2
+
 """
 $(TYPEDEF)
 $(TYPEDFIELDS)
@@ -237,25 +239,42 @@ function resp(
     sum(weights .* ys) / sum(weights)
 end
 
-function log_resp(
+# Log weights for a general (non-Gaussian) kernel. Gaussian weights are handled
+# separately above because they must be shifted to avoid underflow.
+function _kernel_logweights(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{<:PointsItemBank, <:KernelSmoother}},
+        θ)
+    inner_ir = inner_item_response(ir)
+    bandwidth = ir.item_bank.smoother.bandwidths[ir.index]
+    u = (item_xs(inner_ir) .- θ) ./ bandwidth
+    return log.(ir.item_bank.smoother.kernel.(u))
+end
+
+function _kernel_logweights(
         ir::ItemResponse{<:DichotomousSmoothedItemBank{
-            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, outcome::Bool, θ)
-    logweights = _gaussian_logweights(ir, θ)
+            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, θ)
+    _gaussian_logweights(ir, θ)
+end
+
+function log_resp(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{<:PointsItemBank, <:KernelSmoother}},
+        outcome::Bool, θ)
+    logweights = _kernel_logweights(ir, θ)
     ys = item_ys(inner_item_response(ir))
     logprobs = outcome ? log.(ys) : log1p.(-ys)
     logsumexp(logweights .+ logprobs) - logsumexp(logweights)
 end
 
 function log_resp(
-        ir::ItemResponse{<:DichotomousSmoothedItemBank{
-            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, θ)
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{<:PointsItemBank, <:KernelSmoother}},
+        θ)
     log_resp(ir, true, θ)
 end
 
 function log_resp_vec(
-        ir::ItemResponse{<:DichotomousSmoothedItemBank{
-            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, θ)
-    logweights = _gaussian_logweights(ir, θ)
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{<:PointsItemBank, <:KernelSmoother}},
+        θ)
+    logweights = _kernel_logweights(ir, θ)
     ys = item_ys(inner_item_response(ir))
     normalizer = logsumexp(logweights)
     SVector(logsumexp(logweights .+ log1p.(-ys)) - normalizer,
@@ -284,6 +303,29 @@ function resp(
     xs = item_xs(inner_ir)
     ys = item_ys(inner_ir)
     ys[nearest_index(xs, ys, θ)]
+end
+
+function log_resp(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, <:NearestNeighborSmoother}},
+        outcome::Bool, θ)
+    y = resp(ir, θ)
+    return outcome ? log(y) : log1p(-y)
+end
+
+function log_resp(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, <:NearestNeighborSmoother}},
+        θ)
+    log_resp(ir, true, θ)
+end
+
+function log_resp_vec(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, <:NearestNeighborSmoother}},
+        θ)
+    y = resp(ir, θ)
+    return SVector(log1p(-y), log(y))
 end
 
 function nearest_indices(xs, ys, thetas)
