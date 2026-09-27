@@ -23,7 +23,7 @@ export DichotomousSmoothedItemBank, DichotomousPointsItemBank,
 export OneDimensionItemBankAdapter
 
 export domdims, item_bank_domain
-export ItemResponse, resp, resp_vec, responses, item_params
+export ItemResponse, resp, resp_vec, log_resp, log_resp_vec, responses, item_params
 export num_response_categories
 
 export spec_description_slug, spec_description_short, spec_description_long
@@ -445,6 +445,35 @@ Return the vector value of the item response function for the item response
 The outcome at each index corresponds with the indices returned by the [`responses`](@ref) function.
 """
 function resp_vec end
+
+"""
+```julia
+$(FUNCTIONNAME)(ir::ItemResponse, θ) -> Float64  # For BooleanResponse item banks only
+$(FUNCTIONNAME)(ir::ItemResponse, outcome, θ) -> Float64
+```
+
+Return the logarithm of the value of the item response outcome function for the
+item response `ir`, the outcome `outcome` and the ability values `θ`.
+
+This is the numerically stable counterpart of [`resp`](@ref): implementations
+must not compute `log(resp(ir, outcome, θ))`, which underflows to `-Inf` in the
+tails. For `BooleanResponse` item banks, `outcome` can be omitted in which case
+the outcome is assumed to be `true`.
+"""
+function log_resp end
+
+"""
+```julia
+$(FUNCTIONNAME)(ir::ItemResponse, θ) -> AbstractVector{Float64}
+```
+
+Return the vector of logarithms of the item response function for the item
+response `ir` and the ability values `θ`.
+
+The outcome at each index corresponds with the indices returned by the
+[`responses`](@ref) function. See [`log_resp`](@ref).
+"""
+function log_resp_vec end
 
 function convert_parameter_type end
 

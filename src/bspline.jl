@@ -23,6 +23,7 @@ end
 
 DomainType(::BSplineItemBank) = OneDimContinuousDomain()
 ResponseType(::BSplineItemBank) = BooleanResponse()
+domdims(::BSplineItemBank) = 0
 
 function Base.length(item_bank::BSplineItemBank)
     length(item_bank.bases)
@@ -82,3 +83,17 @@ end
 function resp(ir::ItemResponse{<:BSplineItemBank}, θ)
     return 1.0 / (1.0 + exp(-resp_logdensity(ir, θ)))
 end
+
+function log_resp(ir::ItemResponse{<:BSplineItemBank}, outcome::Bool, θ)
+    m = resp_logdensity(ir, θ)
+    return outcome ? loglogistic(m) : loglogistic(-m)
+end
+
+log_resp(ir::ItemResponse{<:BSplineItemBank}, θ) = log_resp(ir, true, θ)
+
+function log_resp_vec(ir::ItemResponse{<:BSplineItemBank}, θ)
+    m = resp_logdensity(ir, θ)
+    return SVector(loglogistic(-m), loglogistic(m))
+end
+
+num_response_categories(ir::ItemResponse{<:BSplineItemBank}) = 2

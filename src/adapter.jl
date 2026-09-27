@@ -37,6 +37,18 @@ function resp_vec(ir::ItemResponse{<:OneDimensionItemBankAdapter}, θ)
     resp_vec(inner_item_response(ir), SA[θ])
 end
 
+function log_resp(ir::ItemResponse{<:OneDimensionItemBankAdapter}, r, θ)
+    log_resp(inner_item_response(ir), r, SA[θ])
+end
+
+function log_resp(ir::ItemResponse{<:OneDimensionItemBankAdapter}, θ)
+    log_resp(inner_item_response(ir), SA[θ])
+end
+
+function log_resp_vec(ir::ItemResponse{<:OneDimensionItemBankAdapter}, θ)
+    log_resp_vec(inner_item_response(ir), SA[θ])
+end
+
 function item_domain(ir::ItemResponse{<:OneDimensionItemBankAdapter}; kwargs...)
     domain = item_domain(inner_item_response(ir); kwargs...)
     return domain[1]

@@ -17,3 +17,15 @@ end
 @testset "basic" begin
     include("./basic.jl")
 end
+
+@testset "nominal probabilities" begin
+    include("./nominal.jl")
+end
+
+@testset "Gaussian smoothing" begin
+    include("./gaussian_smoothing.jl")
+end
+
+@testset "invariants" begin
+    include("./invariants.jl")
+end

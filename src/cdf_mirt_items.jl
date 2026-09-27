@@ -62,6 +62,25 @@ end
 
 num_response_categories(ir::ItemResponse{<:CdfMirtItemBank}) = 2
 
+function log_resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
+    nθ = norm_abil(ir, θ)
+    return SVector(
+        logccdf(ir.item_bank.distribution, nθ),
+        logcdf(ir.item_bank.distribution, nθ)
+    )
+end
+
+function log_resp(ir::ItemResponse{<:CdfMirtItemBank}, outcome::Bool, θ)
+    nθ = norm_abil(ir, θ)
+    if outcome
+        logcdf(ir.item_bank.distribution, nθ)
+    else
+        logccdf(ir.item_bank.distribution, nθ)
+    end
+end
+
+log_resp(ir::ItemResponse{<:CdfMirtItemBank}, θ) = log_resp(ir, true, θ)
+
 function _mirt_norm_abil(θ, difficulty, discrimination)
     dot((θ .- difficulty), discrimination)
 end
@@ -294,3 +313,24 @@ function item_params(item_bank::SlopeInterceptMirtItemBank, idx)
     (; intercept = item_bank.intercepts[idx],
        slop = @view item_bank.slopes[:, idx])
 end
+
+num_response_categories(ir::ItemResponse{<:SlopeInterceptMirtItemBank}) = 2
+
+function log_resp_vec(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
+    nθ = norm_abil(ir, θ)
+    return SVector(
+        logccdf(ir.item_bank.distribution, nθ),
+        logcdf(ir.item_bank.distribution, nθ)
+    )
+end
+
+function log_resp(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, outcome::Bool, θ)
+    nθ = norm_abil(ir, θ)
+    if outcome
+        logcdf(ir.item_bank.distribution, nθ)
+    else
+        logccdf(ir.item_bank.distribution, nθ)
+    end
+end
+
+log_resp(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ) = log_resp(ir, true, θ)
