@@ -25,9 +25,10 @@ probability at every supplied point: finite logs are then required even when the
 ordinary probability underflows. Include extreme *finite* abilities to distinguish
 stable log implementations from `log(resp(...))`.
 
-Scalar/vector and probability/log comparisons use relative tolerance only, so a
-small nonzero probability cannot silently compare equal to zero. Normalization
-uses `atol` as well. No monotonicity or common category count across items is assumed.
+Ordinary probability comparisons use both `rtol` and `atol`, allowing small
+absolute errors from complement subtraction near zero. Log stability is checked
+separately through normalization, scalar/vector agreement, and (when requested)
+finite logs. No monotonicity or common category count across items is assumed.
 """
 function test_item_response(ir::ItemResponse, points;
         strictly_positive=false, rtol=1e-10, atol=1e-12)
@@ -59,7 +60,7 @@ function test_item_response(ir::ItemResponse, points;
                 for (j, outcome) in enumerate(outcomes)
                     q = resp(ir, outcome, θ)
                     @test isfinite(q) && 0 <= q <= 1
-                    @test isapprox(q, p[j]; rtol, atol=0)
+                    @test isapprox(q, p[j]; rtol, atol)
                 end
                 if boolean
                     @test resp(ir, θ) == resp(ir, true, θ)
@@ -75,9 +76,9 @@ function test_item_response(ir::ItemResponse, points;
                     if strictly_positive
                         @test all(isfinite, lp)
                     end
-                    @test isapprox(exp.(lp), resp_vec(ir, θ); rtol, atol=0)
+                    @test isapprox(exp.(lp), resp_vec(ir, θ); rtol, atol)
                     for (j, outcome) in enumerate(outcomes)
-                        @test isapprox(exp(lp[j]), resp(ir, outcome, θ); rtol, atol=0)
+                        @test isapprox(exp(lp[j]), resp(ir, outcome, θ); rtol, atol)
                     end
                 end
                 for (j, outcome) in enumerate(outcomes)
@@ -87,7 +88,7 @@ function test_item_response(ir::ItemResponse, points;
                         if strictly_positive
                             @test isfinite(lq)
                         end
-                        @test isapprox(exp(lq), resp(ir, outcome, θ); rtol, atol=0)
+                        @test isapprox(exp(lq), resp(ir, outcome, θ); rtol, atol)
                         if has_log_vec
                             @test isapprox(lq, log_resp_vec(ir, θ)[j]; rtol, atol)
                         end

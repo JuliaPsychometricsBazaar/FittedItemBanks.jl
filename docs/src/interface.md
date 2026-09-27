@@ -78,6 +78,10 @@ for your bank: scalars for scalar domains, or vectors of length `domdims(bank)` 
 vector domains. Include ordinary and extreme finite abilities to exercise numerical
 stability.
 
+Ordinary probability comparisons allow small absolute errors near zero, such as
+those from computing a complement as `1 - p`; adjust `rtol` and `atol` if needed.
+Log normalization and scalar/vector log agreement are checked separately.
+
 Set `strictly_positive=true` only if every category has mathematically positive
 probability at every supplied ability. This requires finite log probabilities even
 when ordinary probabilities underflow. Otherwise, leave it at its default `false`,
