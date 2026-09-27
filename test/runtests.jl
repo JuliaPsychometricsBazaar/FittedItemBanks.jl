@@ -33,3 +33,7 @@ end
 @testset "LogItemBank" begin
     include("./logitembank.jl")
 end
+
+@testset "DichotomousPointsWithLogsItemBank" begin
+    include("./points_with_logs_itembank.jl")
+end
