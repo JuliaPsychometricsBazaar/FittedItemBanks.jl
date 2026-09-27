@@ -6,5 +6,5 @@ Non-parametric IRT models
 
 ```@autodocs
 Modules = [FittedItemBanks]
-Pages   = ["sampled_items.jl"]
+Pages   = ["sampled_items.jl", "points_with_logs_itembank.jl"]
 ```

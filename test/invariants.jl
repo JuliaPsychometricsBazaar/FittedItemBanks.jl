@@ -69,10 +69,12 @@ const BankTests = Base.get_extension(FittedItemBanks, :TestExt)
     push!(fixtures, ("B-spline", spline, scalar_points, true))
 
     shared = DichotomousPointsItemBank([-2.0, 0.0, 2.0], [0.0 0.1; 0.4 0.6; 1.0 0.9])
+    with_logs = DichotomousPointsWithLogsItemBank(shared)
     multi = MultiGridDichotomousPointsItemBank(
         VectorOfVectors([[-2.0, 0.0, 2.0], [-3.0, -1.0, 1.0, 3.0]]),
         VectorOfVectors([[0.0, 0.4, 1.0], [0.1, 0.3, 0.7, 0.9]]))
-    for (name, points_bank) in (("shared grid", shared), ("per-item grid", multi))
+    for (name, points_bank) in (("shared grid", shared), ("per-item grid", multi),
+            ("cached logs", with_logs))
         @testset "$name" begin
             BankTests.test_points_item_bank(points_bank)
         end
@@ -93,7 +95,7 @@ const BankTests = Base.get_extension(FittedItemBanks, :TestExt)
         for value in (getfield(FittedItemBanks, name),)
         if value isa Union{DataType, UnionAll} && value <: AbstractItemBank && !isabstracttype(value))
     tested_types = Set(Base.typename(typeof(bank)).wrapper
-        for bank in [shared, multi, [fixture[2] for fixture in fixtures]...])
+        for bank in [shared, multi, with_logs, [fixture[2] for fixture in fixtures]...])
     @test concrete_types == tested_types
     for (name, bank, points, positive) in fixtures
         @testset "$name" begin

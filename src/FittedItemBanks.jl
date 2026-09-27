@@ -22,6 +22,7 @@ export DichotomousSmoothedItemBank, DichotomousPointsItemBank,
        MultiGridDichotomousPointsItemBank
 export OneDimensionItemBankAdapter
 export LogItemBank
+export DichotomousPointsWithLogsItemBank
 
 export domdims, item_bank_domain
 export ItemResponse, resp, resp_vec, log_resp, log_resp_vec, responses, item_params
@@ -39,6 +40,7 @@ export SimpleItemBankSpec, StdModel2PL, StdModel3PL, StdModel4PL
 export basic_item_bank, replace_basic_item_bank
 
 public guess_slip_indicators, subset, subset_view
+public item_log_ys
 
 using Distributions
 using Distributions: Logistic, UnivariateDistribution, Normal, MvNormal, Zeros, ScalMat
@@ -486,6 +488,7 @@ include("./cdf_mirt_items.jl")
 include("./monopoly.jl")
 include("./bspline.jl")
 include("./sampled_items.jl")
+include("./points_with_logs_itembank.jl")
 include("./nominal_items.jl")
 include("./guess_slip_items.jl")
 include("./porcelain.jl")
