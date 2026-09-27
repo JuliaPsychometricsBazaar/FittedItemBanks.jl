@@ -26,6 +26,12 @@ Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 SpelledOut = "4728c690-e668-4265-bc0d-51a8c0f93067"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
+[weakdeps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[extensions]
+TestExt = "Test"
+
 [compat]
 ArraysOfArrays = "0.6, 1"
 BSplines = "0.3.3"
@@ -45,4 +51,5 @@ ResumableFunctions = "^1"
 Setfield = "1"
 SpelledOut = "1.2.4"
 StaticArrays = "1"
+Test = "^1.11"
 julia = "^1.12"

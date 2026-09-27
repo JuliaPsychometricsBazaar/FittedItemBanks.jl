@@ -17,3 +17,7 @@ end
 @testset "basic" begin
     include("./basic.jl")
 end
+
+@testset "invariants" begin
+    include("./invariants.jl")
+end
