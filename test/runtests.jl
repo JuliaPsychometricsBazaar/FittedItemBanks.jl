@@ -22,6 +22,10 @@ end
     include("./nominal.jl")
 end
 
+@testset "Gaussian smoothing" begin
+    include("./gaussian_smoothing.jl")
+end
+
 @testset "invariants" begin
     include("./invariants.jl")
 end

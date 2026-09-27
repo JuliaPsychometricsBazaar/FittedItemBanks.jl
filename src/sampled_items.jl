@@ -218,6 +218,50 @@ function resp(
     sum(kernel_comb .* (item_ys(inner_ir))) / sum(kernel_comb)
 end
 
+# A common scale cancels in the weighted average. Shift before exponentiating
+# so at least one weight is one, even far outside the sampled grid.
+function _gaussian_logweights(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, θ)
+    inner_ir = inner_item_response(ir)
+    bandwidth = ir.item_bank.smoother.bandwidths[ir.index]
+    logweights = -0.5 .* ((item_xs(inner_ir) .- θ) ./ bandwidth) .^ 2
+    logweights .- maximum(logweights)
+end
+
+function resp(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, θ)
+    weights = exp.(_gaussian_logweights(ir, θ))
+    ys = item_ys(inner_item_response(ir))
+    sum(weights .* ys) / sum(weights)
+end
+
+function log_resp(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, outcome::Bool, θ)
+    logweights = _gaussian_logweights(ir, θ)
+    ys = item_ys(inner_item_response(ir))
+    logprobs = outcome ? log.(ys) : log1p.(-ys)
+    logsumexp(logweights .+ logprobs) - logsumexp(logweights)
+end
+
+function log_resp(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, θ)
+    log_resp(ir, true, θ)
+end
+
+function log_resp_vec(
+        ir::ItemResponse{<:DichotomousSmoothedItemBank{
+            <:PointsItemBank, KernelSmoother{typeof(gauss_kern)}}}, θ)
+    logweights = _gaussian_logweights(ir, θ)
+    ys = item_ys(inner_item_response(ir))
+    normalizer = logsumexp(logweights)
+    SVector(logsumexp(logweights .+ log1p.(-ys)) - normalizer,
+        logsumexp(logweights .+ log.(ys)) - normalizer)
+end
+
 function nearest_index(xs, ys, θ)
     neighbor_idx = searchsortedfirst(xs, θ)
     if (
