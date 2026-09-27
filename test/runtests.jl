@@ -18,6 +18,10 @@ end
     include("./basic.jl")
 end
 
+@testset "nominal probabilities" begin
+    include("./nominal.jl")
+end
+
 @testset "invariants" begin
     include("./invariants.jl")
 end

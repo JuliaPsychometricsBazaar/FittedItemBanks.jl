@@ -124,12 +124,12 @@ function num_response_categories(ir::ItemResponse{<:NominalItemBank})
 end
 
 function resp(ir::ItemResponse{<:NominalItemBank}, resp, θ)
-    outs = exp.(resp_logdensity_vec(ir, θ))
-    outs[resp] ./ sum(outs)
+    resp_vec(ir, θ)[resp]
 end
 
 function resp_vec(ir::ItemResponse{<:NominalItemBank}, θ)
-    outs = exp.(resp_logdensity_vec(ir, θ))
+    logits = resp_logdensity_vec(ir, θ)
+    outs = exp.(logits .- maximum(logits))
     outs ./ sum(outs)
 end
 
