@@ -31,6 +31,7 @@ const BankTests = Base.get_extension(FittedItemBanks, :TestExt)
         end
     end
     base = ItemBank2PL(difficulties, slopes)
+    push!(fixtures, ("logarithmic 2PL", LogItemBank(base), scalar_points, true))
     for (name, bank) in (
             ("2PL", base),
             ("3PL", ItemBank3PL(difficulties, slopes, guesses)),

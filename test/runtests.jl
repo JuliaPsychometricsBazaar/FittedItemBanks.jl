@@ -29,3 +29,7 @@ end
 @testset "invariants" begin
     include("./invariants.jl")
 end
+
+@testset "LogItemBank" begin
+    include("./logitembank.jl")
+end

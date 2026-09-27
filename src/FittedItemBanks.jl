@@ -21,6 +21,7 @@ export PointsItemBank
 export DichotomousSmoothedItemBank, DichotomousPointsItemBank,
        MultiGridDichotomousPointsItemBank
 export OneDimensionItemBankAdapter
+export LogItemBank
 
 export domdims, item_bank_domain
 export ItemResponse, resp, resp_vec, log_resp, log_resp_vec, responses, item_params
@@ -54,6 +55,7 @@ using ArraysOfArrays
 using BSplines
 using BSplines: NoDerivative, bsplines_destarray, _bsplines!, bsplines_offsetarray
 using LogExpFunctions
+using LogarithmicNumbers: ULogarithmic
 using ResumableFunctions
 using Polynomials
 using ConstructionBase
@@ -478,6 +480,7 @@ function log_resp_vec end
 function convert_parameter_type end
 
 include("./adapter.jl")
+include("./logitembank.jl")
 include("./cdf_items.jl")
 include("./cdf_mirt_items.jl")
 include("./monopoly.jl")
