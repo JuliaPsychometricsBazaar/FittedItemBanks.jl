@@ -58,6 +58,12 @@ log_resp_vec
 responses
 ```
 
+## Logarithmic probabilities
+
+```@docs
+LogItemBank
+```
+
 ## Testing an item bank
 
 When implementing an `AbstractItemBank`, either in another package or for inclusion
