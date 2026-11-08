@@ -440,18 +440,13 @@ function resp end
 
 """
 ```julia
-$(FUNCTIONNAME)(ir::ItemResponse, θ) -> AbstractVector
+$(FUNCTIONNAME)(ir::ItemResponse, θ) -> AbstractVector{Float64}
 ```
 
 Return the vector value of the item response function for the item response
 `ir`, the outcome `outcome` and the ability values `θ`.
 
 The outcome at each index corresponds with the indices returned by the [`responses`](@ref) function.
-
-Transfer and CDF-based MIRT banks evaluate both tails directly. Their logistic
-specializations share one exponential without subtracting a small probability
-from one. Guess/slip wrappers preserve those paired probabilities. Other item
-bank families retain their own probability representation and tail behavior.
 """
 function resp_vec end
 
