@@ -62,3 +62,33 @@ end
     bank = ItemBank4PL([0.0], [1.5], [0.1], [0.2])
     @test response_pair_allocations(ItemResponse(bank, 1), 0.7) == 0
 end
+
+function response_pairs_on_grid!(first, second, ir, grid)
+    @inbounds for i in eachindex(grid)
+        pair = resp_vec(ir, grid[i])
+        first[i], second[i] = pair[1], pair[2]
+    end
+end
+
+@testset "response loops preserve logistic tails" begin
+    for T in (Float32, Float64), n in (33, 65, 129)
+        grid = vcat(collect(range(T(-40), T(40); length=n)),
+            T[-Inf, -745, -744, -709, 709, 744, 745, Inf, NaN])
+        ir = ItemResponse(TransferItemBank(Logistic(T(0), T(1)), T[0], T[1]), 1)
+        first, second = similar(grid), similar(grid)
+        response_pairs_on_grid!(first, second, ir, grid)
+        setprecision(256) do
+            for i in eachindex(grid)
+                x = BigFloat(grid[i])
+                if isnan(x)
+                    @test isnan(first[i]) && isnan(second[i])
+                else
+                    expected_first = T(inv(1 + exp(x)))
+                    expected_second = T(inv(1 + exp(-x)))
+                    @test first[i] ≈ expected_first rtol=32eps(T) atol=0
+                    @test second[i] ≈ expected_second rtol=32eps(T) atol=0
+                end
+            end
+        end
+    end
+end
