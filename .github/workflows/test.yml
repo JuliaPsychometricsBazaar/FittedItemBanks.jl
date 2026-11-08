@@ -49,3 +49,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           file: lcov.info
+          # Avoid the failing GitHub releases/latest download redirect.
+          coverage-reporter-version: v0.6.22
