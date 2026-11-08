@@ -37,3 +37,7 @@ end
 @testset "DichotomousPointsWithLogsItemBank" begin
     include("./points_with_logs_itembank.jl")
 end
+
+@testset "stable ordinary response pairs" begin
+    include("./response_pairs.jl")
+end

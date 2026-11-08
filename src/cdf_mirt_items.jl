@@ -90,9 +90,8 @@ function norm_abil(ir::ItemResponse{<:CdfMirtItemBank}, θ)
         @view ir.item_bank.discriminations[:, ir.index])
 end
 
-function resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
-    resp1 = resp(ir, θ)
-    SVector(1.0 - resp1, resp1)
+@inline function resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
+    _cdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 function item_domain(
@@ -151,7 +150,7 @@ function item_response_category_uncertain(ir::ItemResponse{<:CdfMirtItemBank}, o
     return acc
 end
 
-function resp(ir::ItemResponse{<:CdfMirtItemBank}, outcome::Bool, θ)
+@inline function resp(ir::ItemResponse{<:CdfMirtItemBank}, outcome::Bool, θ)
     if outcome
         resp(ir, θ)
     else
@@ -256,9 +255,8 @@ function norm_abil(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
         @view ir.item_bank.slopes[:, ir.index])
 end
 
-function resp_vec(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
-    resp1 = resp(ir, θ)
-    SVector(1.0 - resp1, resp1)
+@inline function resp_vec(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
+    _cdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 #=
@@ -293,7 +291,7 @@ function item_domain(
 end
 =#
 
-function resp(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, outcome::Bool, θ)
+@inline function resp(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, outcome::Bool, θ)
     if outcome
         resp(ir, θ)
     else

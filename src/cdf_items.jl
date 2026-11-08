@@ -1,3 +1,18 @@
+# Keep both ordinary tails: deriving a small CCDF as 1-CDF loses it when
+# the CDF rounds to one. Other distributions retain their own tail algorithms.
+@inline _cdf_response_pair(distribution, x) =
+    SVector(ccdf(distribution, x), cdf(distribution, x))
+
+@inline function _cdf_response_pair(distribution::Logistic, x)
+    location, scale = params(distribution)
+    z = (x - location) / scale
+    positive = z >= zero(z)
+    e = exp(ifelse(positive, -z, z))
+    large = inv(one(e) + e)
+    small = e * large
+    SVector(ifelse(positive, small, large), ifelse(positive, large, small))
+end
+
 """
 ```julia
 struct TransferItemBank <: AbstractItemBank
@@ -57,9 +72,8 @@ function unnorm_abil(ir::ItemResponse{<:TransferItemBank}, θ)
         θ, ir.item_bank.difficulties[ir.index], ir.item_bank.discriminations[ir.index])
 end
 
-function resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
-    resp1 = resp(ir, θ)
-    SVector(1.0 - resp1, resp1)
+@inline function resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
+    _cdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 function item_response_category_uncertain(ir::ItemResponse{<:TransferItemBank}, outcome;
@@ -81,7 +95,7 @@ function minabilresp(::ItemResponse{<:TransferItemBank})
     return SVector(1.0, 0.0)
 end
 
-function resp(ir::ItemResponse{<:TransferItemBank}, outcome::Bool, θ)
+@inline function resp(ir::ItemResponse{<:TransferItemBank}, outcome::Bool, θ)
     if outcome
         resp(ir, θ)
     else
@@ -210,9 +224,8 @@ function unnorm_abil(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
         θ, ir.item_bank.intercepts[ir.index], ir.item_bank.slopes[ir.index])
 end
 
-function resp_vec(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
-    resp1 = resp(ir, θ)
-    SVector(1.0 - resp1, resp1)
+@inline function resp_vec(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    _cdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 function item_response_category_uncertain(ir::ItemResponse{<:SlopeInterceptTransferItemBank},
@@ -234,7 +247,7 @@ function minabilresp(::ItemResponse{<:SlopeInterceptTransferItemBank})
     return SVector(1.0, 0.0)
 end
 
-function resp(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, outcome::Bool, θ)
+@inline function resp(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, outcome::Bool, θ)
     if outcome
         resp(ir, θ)
     else
