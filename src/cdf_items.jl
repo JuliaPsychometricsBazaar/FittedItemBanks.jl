@@ -7,7 +7,8 @@
     location, scale = params(distribution)
     z = (x - location) / scale
     positive = z >= zero(z)
-    e = exp(ifelse(positive, -z, z))
+    # Expose Base's exp implementation to vectorization of the caller's loop.
+    e = @inline exp(ifelse(positive, -z, z))
     large = inv(one(e) + e)
     small = e * large
     SVector(ifelse(positive, small, large), ifelse(positive, large, small))
