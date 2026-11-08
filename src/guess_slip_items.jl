@@ -125,11 +125,11 @@ function resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
     resp(ir, true, θ)
 end
 
-function resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ)
+@inline function resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ)
     transform_irf_y(ir, response, resp(inner_item_response(ir), response, θ))
 end
 
-function resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
+@inline function resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
     r = resp_vec(inner_item_response(ir), θ)
     SVector(transform_irf_y(ir, false, r[1]), transform_irf_y(ir, true, r[2]))
 end
