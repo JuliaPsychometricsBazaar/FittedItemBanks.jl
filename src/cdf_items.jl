@@ -3,9 +3,18 @@
 @inline _cdf_response_pair(distribution, x) =
     SVector(ccdf(distribution, x), cdf(distribution, x))
 
+@inline _logistic_coordinate(x, location, scale) = (x - location) / scale
+
+# Dual-number scales must retain their derivative even when their value is one.
+@inline function _logistic_coordinate(x::T, location::T, scale::T) where {
+        T <: Union{Float32, Float64}}
+    shifted = x - location
+    isone(scale) ? shifted : shifted / scale
+end
+
 @inline function _cdf_response_pair(distribution::Logistic, x)
     location, scale = params(distribution)
-    z = (x - location) / scale
+    z = _logistic_coordinate(x, location, scale)
     positive = z >= zero(z)
     # Expose Base's exp implementation to vectorization of the caller's loop.
     e = @inline exp(ifelse(positive, -z, z))
