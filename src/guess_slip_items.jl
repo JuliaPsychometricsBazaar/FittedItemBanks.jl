@@ -182,7 +182,7 @@ end
 
 log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log_resp(ir, true, θ)
 
-function log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
+@inline function log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
     guess = ir.item_bank.guesses[ir.index]
     slip = ir.item_bank.slips[ir.index]
     scale = irf_size(guess, slip)

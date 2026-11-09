@@ -45,3 +45,7 @@ end
 @testset "guess/slip item banks" begin
     include("./guess_slip_items.jl")
 end
+
+@testset "log_response_pairs" begin
+    include("./log_response_pairs.jl")
+end

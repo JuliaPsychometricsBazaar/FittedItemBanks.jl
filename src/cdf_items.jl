@@ -1,3 +1,19 @@
+# Share the softplus term while retaining native log tails after exp underflows.
+@inline _logcdf_response_pair(distribution, x) =
+    SVector(logccdf(distribution, x), logcdf(distribution, x))
+
+@inline function _logcdf_response_pair(distribution::Logistic, x)
+    location, scale = params(distribution)
+    z = _logistic_coordinate(x, location, scale)
+    positive = z >= zero(z)
+    small_z = ifelse(positive, -z, z)
+    e = @inline exp(small_z)
+    q = @inline log1p(e)
+    small = small_z - q
+    large = -q
+    SVector(ifelse(positive, small, large), ifelse(positive, large, small))
+end
+
 # Keep both ordinary tails: deriving a small CCDF as 1-CDF loses it when
 # the CDF rounds to one. Other distributions retain their own tail algorithms.
 @inline _cdf_response_pair(distribution, x) =
@@ -140,12 +156,8 @@ end
 
 num_response_categories(ir::ItemResponse{<:TransferItemBank}) = 2
 
-function log_resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
-    nθ = norm_abil(ir, θ)
-    return SVector(
-        logccdf(ir.item_bank.distribution, nθ),
-        logcdf(ir.item_bank.distribution, nθ)
-    )
+@inline function log_resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
+    _logcdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 function log_resp(ir::ItemResponse{<:TransferItemBank}, outcome::Bool, θ)
@@ -284,12 +296,8 @@ end
 
 num_response_categories(ir::ItemResponse{<:SlopeInterceptTransferItemBank}) = 2
 
-function log_resp_vec(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
-    nθ = norm_abil(ir, θ)
-    return SVector(
-        logccdf(ir.item_bank.distribution, nθ),
-        logcdf(ir.item_bank.distribution, nθ)
-    )
+@inline function log_resp_vec(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, θ)
+    _logcdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 function log_resp(ir::ItemResponse{<:SlopeInterceptTransferItemBank}, outcome::Bool, θ)
