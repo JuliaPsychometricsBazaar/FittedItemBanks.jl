@@ -193,7 +193,7 @@ function log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank})
     log_scale = log(float(irf_size(guess, slip)))
     inner = log_resp_vec(inner_item_response(ir))
     θ -> begin
-        pair = inner(θ)
+        pair = @inline inner(θ)
         SVector(_log_transform_irf_logs(log_slip, log_scale, pair[1]),
             _log_transform_irf_logs(log_guess, log_scale, pair[2]))
     end
