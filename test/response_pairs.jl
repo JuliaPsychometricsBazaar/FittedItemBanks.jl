@@ -54,6 +54,51 @@ end
     end
 end
 
+@testset "guess/slip response precision" begin
+    for (P, T, A) in ((Float32, Float32, Float32), (Float64, Float64, Float64),
+            (BigFloat, BigFloat, BigFloat), (Float32, Float64, Float32),
+            (Float64, Float32, Float32), (Float32, Float32, Float64),
+            (Float32, BigFloat, Float32))
+        R = promote_type(P, T, A)
+        rtol = 16max(eps(P), eps(promote_type(T, A)))
+        inner = TransferItemBank(Logistic(zero(T), one(T)), T[0], T[1])
+        for (guess, slip) in ((P(0.125), P(0.25)), (zero(P), zero(P)),
+                (one(P), zero(P)), (zero(P), one(P)))
+            ir = ItemResponse(GuessAndSlipItemBank([guess], [slip], inner), 1)
+            for θ in A[-1000, -1, 0, 1, 1000]
+                pair = resp_vec(ir, θ)
+                log_pair = log_resp_vec(ir, θ)
+                @test eltype(pair) === R
+                @test eltype(log_pair) === R
+                @test sum(pair) ≈ one(R) rtol=rtol
+                @test sum(exp, log_pair) ≈ one(R) rtol=rtol
+                @test resp(ir, θ) isa R
+                @test log_resp(ir, θ) isa R
+                @test resp(ir, θ) == resp(ir, true, θ)
+                @test log_resp(ir, θ) == log_resp(ir, true, θ)
+                for (index, outcome) in enumerate((false, true))
+                    p = resp(ir, outcome, θ)
+                    logp = log_resp(ir, outcome, θ)
+                    @test p isa R
+                    @test logp isa R
+
+                    # Use both tails so the reference log stays accurate near one.
+                    x = BigFloat(outcome ? θ : -θ)
+                    offset, other = outcome ? (guess, slip) : (slip, guess)
+                    scale = 1 - BigFloat(guess) - BigFloat(slip)
+                    expected = BigFloat(offset) + scale / (1 + exp(-x))
+                    complement = BigFloat(other) + scale / (1 + exp(x))
+                    expected_log = expected > 0.5 ? log1p(-complement) : log(expected)
+                    @test p ≈ R(expected) rtol=rtol atol=0
+                    @test pair[index] ≈ R(expected) rtol=rtol atol=0
+                    @test logp ≈ R(expected_log) rtol=rtol atol=0
+                    @test log_pair[index] ≈ R(expected_log) rtol=rtol atol=0
+                end
+            end
+        end
+    end
+end
+
 function response_pair_allocations(ir, x)
     resp_vec(ir, x)
     @allocated resp_vec(ir, x)
