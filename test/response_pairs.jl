@@ -3,8 +3,8 @@ using ForwardDiff
 
 @testset "transfer pairs retain both tails" begin
     for T in (Float32, Float64, BigFloat), distribution in
-            (Logistic(T(0), T(1)), Logistic(T(3), T(2)), Normal(T(2), T(3)),
-             Gamma(T(2), T(3)))
+            (Logistic(T(0), T(1)), Logistic(T(3), T(1)), Logistic(T(3), T(2)),
+             Normal(T(2), T(3)), Gamma(T(2), T(3)))
         transfer = TransferItemBank(distribution, T[0], T[1])
         mirt = CdfMirtItemBank(distribution, [0.0], ones(1, 1))
         for bank in (transfer, SlopeInterceptTransferItemBank(distribution, [0.0], [1.0]),
@@ -90,5 +90,25 @@ end
                 end
             end
         end
+    end
+end
+
+@testset "logistic normalization with mixed precision" begin
+    for T in (Float32, Float64, BigFloat), U in (Float32, Float64, BigFloat),
+            location in (0, 3), scale in (1, 2), x in U[-40, -0.0, 0, 1, 40]
+        bank = TransferItemBank(Logistic(T(location), T(scale)), T[0], T[1])
+        ir = ItemResponse(bank, 1)
+        pair = resp_vec(ir, x)
+        reference = [resp(ir, false, x), resp(ir, true, x)]
+        @test all(isapprox.(pair, reference; rtol=32max(eps(T), eps(U)), atol=0))
+    end
+end
+
+@testset "unit logistic scales retain derivatives" begin
+    for T in (Float32, Float64), scale in T[1, 2], x in T[-2, 0.7, 3]
+        probability = s -> resp_vec(ItemResponse(
+            TransferItemBank(Logistic(zero(T), s), T[0], T[1]), 1), x)[2]
+        expected = -x / scale * pdf(Logistic(zero(T), scale), x)
+        @test ForwardDiff.derivative(probability, scale) ≈ expected rtol=32eps(T)
     end
 end
