@@ -100,7 +100,12 @@ function item_params(item_bank::GuessAndSlipItemBank, idx)
 end
 
 function convert_parameter_type(T::Type, item_bank::GuessAndSlipItemBank)
-    SlipItemBank(convert(Vector{T}, item_bank.slips), convert_parameter_type(T, item_bank.inner_bank))
+    # Keep Zeros arrays, which identify omitted guess or slip parameters.
+    GuessAndSlipItemBank(
+        convert(AbstractArray{T}, item_bank.guesses),
+        convert(AbstractArray{T}, item_bank.slips),
+        convert_parameter_type(T, item_bank.inner_bank)
+    )
 end
 
 DomainType(item_bank::GuessAndSlipItemBank) = DomainType(item_bank.inner_bank)
@@ -209,21 +214,19 @@ end
 ## Psuedo-constructors
 
 function FixedGuessItemBank(guess, inner_bank)
-    nitems = length(inner_bank)
-    GuessAndSlipItemBank(Fill(guess, nitems), Zeros(nitems), inner_bank)
+    GuessItemBank(Fill(guess, length(inner_bank)), inner_bank)
 end
 
 function FixedSlipItemBank(slip, inner_bank)
-    nitems = length(inner_bank)
-    GuessAndSlipItemBank(Zeros(nitems), Fill(slip, nitems), inner_bank)
+    SlipItemBank(Fill(slip, length(inner_bank)), inner_bank)
 end
 
 function GuessItemBank(guesses, inner_bank)
     nitems = length(inner_bank)
-    GuessAndSlipItemBank(guesses, Zeros(nitems), inner_bank)
+    GuessAndSlipItemBank(guesses, Zeros{eltype(guesses)}(nitems), inner_bank)
 end
 
 function SlipItemBank(slips, inner_bank)
     nitems = length(inner_bank)
-    GuessAndSlipItemBank(Zeros(nitems), slips, inner_bank)
+    GuessAndSlipItemBank(Zeros{eltype(slips)}(nitems), slips, inner_bank)
 end

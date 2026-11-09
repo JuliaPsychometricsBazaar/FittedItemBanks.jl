@@ -41,3 +41,7 @@ end
 @testset "stable ordinary response pairs" begin
     include("./response_pairs.jl")
 end
+
+@testset "guess/slip item banks" begin
+    include("./guess_slip_items.jl")
+end
