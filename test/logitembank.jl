@@ -128,3 +128,13 @@ end
         @test log(p * p) ≈ -2000.0
     end
 end
+
+@testset "unsigned log probability comparisons" begin
+    ext = Base.get_extension(FittedItemBanks, :TestExt)
+    for a in (-1.2482736303037976, -1000.)
+        p, q = exp(ULogarithmic, a), exp(ULogarithmic, nextfloat(a))
+        @test ext.probability_isapprox(p,q;rtol=1e-10,atol=0)
+        @test ext.probability_isapprox(q,p;rtol=1e-10,atol=0)
+        @test !ext.probability_isapprox(p,exp(ULogarithmic,a+1);rtol=1e-10,atol=0)
+    end
+end

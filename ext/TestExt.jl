@@ -4,6 +4,7 @@ using Test
 using FittedItemBanks
 using FittedItemBanks: log_resp, log_resp_vec, item_xs, item_ys, PointsItemBank
 using LogExpFunctions: logsumexp
+using LogarithmicNumbers: ULogarithmic, Logarithmic
 
 export test_item_bank, test_item_response, test_points_item_bank
 
@@ -13,6 +14,12 @@ function supports(f, args...)
     @test applicable(f, args...)
     return available
 end
+
+# LogarithmicNumbers 1.0 cannot subtract a larger unsigned value in isapprox.
+# Signed comparison retains tiny tails and the caller's probability tolerances.
+probability_isapprox(x, y; kwargs...) = isapprox(x, y; kwargs...)
+probability_isapprox(x::ULogarithmic, y::ULogarithmic; kwargs...) =
+    isapprox(Logarithmic(x), Logarithmic(y); kwargs...)
 
 """
     test_item_response(ir, points; strictly_positive=false, rtol=1e-10, atol=1e-12)
@@ -60,7 +67,7 @@ function test_item_response(ir::ItemResponse, points;
                 for (j, outcome) in enumerate(outcomes)
                     q = resp(ir, outcome, θ)
                     @test isfinite(q) && 0 <= q <= 1
-                    @test isapprox(q, p[j]; rtol, atol)
+                    @test probability_isapprox(q, p[j]; rtol, atol)
                 end
                 if boolean
                     @test resp(ir, θ) == resp(ir, true, θ)
