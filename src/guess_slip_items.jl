@@ -35,7 +35,10 @@ struct GuessAndSlipItemBank{
     end
 end
 
-irf_size(guess, slip) = 1.0 - guess - slip
+function irf_size(guess, slip)
+    guess, slip = promote(guess, slip)
+    return one(guess) - guess - slip
+end
 
 @inline function transform_irf_y(guess, slip, y)
     guess + irf_size(guess, slip) * y
