@@ -10,10 +10,13 @@ using FittedItemBanks, Test, Distributions, ForwardDiff
         for bank in banks
             for (g,s) in ((T(0),T(0)),(T(.2),T(.1)),(T(1),T(0)),(T(0),T(1)))
                 ir = ItemResponse(GuessAndSlipItemBank([g], [s], bank), 1)
+                evaluate = log_resp_vec(ir)
                 for x in T[-Inf,-1000,-700,-40,-1,-0.,0.,1,3,40,700,1000,Inf]
                     pair = log_resp_vec(ir, x)
                     expected = [log_resp(ir, false, x), log_resp(ir, true, x)]
                     @test all(isapprox.(pair, expected; rtol=64eps(T), atol=eps(T)))
+                    @test all(isapprox.(evaluate(x), pair; rtol=64eps(T), atol=eps(T)))
+                    @test eltype(evaluate(x)) == T
                     @test eltype(pair) == T
                     @test sum(exp.(pair)) ≈ one(T) rtol=64eps(T)
                 end
@@ -50,4 +53,17 @@ end
             @test log_resp_vec(ir, [x]) ≈ [log_resp(ir, false, [x]), log_resp(ir, true, [x])]
         end
     end
+end
+
+@testset "reusable log evaluators" begin
+    bank = GuessAndSlipItemBank([0.2], [0.1], TransferItemBank(Logistic(), [0.], [1.]))
+    ir = ItemResponse(bank,1)
+    evaluate = log_resp_vec(ir)
+    @test ForwardDiff.derivative(x -> evaluate(x)[1], 0.) ≈
+        ForwardDiff.derivative(x -> log_resp_vec(ir,x)[1], 0.)
+    bank.guesses[1] = 0.3
+    @test log_resp_vec(ir)(0.) ≈ log_resp_vec(ir,0.)
+    # Uncustomized banks retain the ordinary log-response dispatch.
+    fallback = ItemResponse(SlopeInterceptTransferItemBank(Logistic(),[0.],[1.]),1)
+    @test log_resp_vec(fallback)(0.) == log_resp_vec(fallback,0.)
 end

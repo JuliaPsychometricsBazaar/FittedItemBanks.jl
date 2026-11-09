@@ -167,7 +167,11 @@ end
 @inline function _log_transform_irf(offset, scale, inner_logp)
     # The result is a log-probability and so is at most zero. `logaddexp` can
     # return a tiny positive value when `offset + scale` rounds to exactly one.
-    logp = logaddexp(log(float(offset)), log(float(scale)) + inner_logp)
+    _log_transform_irf_logs(log(float(offset)), log(float(scale)), inner_logp)
+end
+
+@inline function _log_transform_irf_logs(log_offset, log_scale, inner_logp)
+    logp = logaddexp(log_offset, log_scale + inner_logp)
     return min(logp, zero(logp))
 end
 
@@ -181,6 +185,19 @@ function log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ)
 end
 
 log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, θ) = log_resp(ir, true, θ)
+
+function log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank})
+    guess = ir.item_bank.guesses[ir.index]
+    slip = ir.item_bank.slips[ir.index]
+    log_guess, log_slip = log(float(guess)), log(float(slip))
+    log_scale = log(float(irf_size(guess, slip)))
+    inner = log_resp_vec(inner_item_response(ir))
+    θ -> begin
+        pair = inner(θ)
+        SVector(_log_transform_irf_logs(log_slip, log_scale, pair[1]),
+            _log_transform_irf_logs(log_guess, log_scale, pair[2]))
+    end
+end
 
 @inline function log_resp_vec(ir::ItemResponse{<:GuessAndSlipItemBank}, θ)
     guess = ir.item_bank.guesses[ir.index]

@@ -156,6 +156,13 @@ end
 
 num_response_categories(ir::ItemResponse{<:TransferItemBank}) = 2
 
+function log_resp_vec(ir::ItemResponse{<:TransferItemBank})
+    distribution = ir.item_bank.distribution
+    difficulty = ir.item_bank.difficulties[ir.index]
+    discrimination = ir.item_bank.discriminations[ir.index]
+    θ -> _logcdf_response_pair(distribution, _norm_abil_1d(θ, difficulty, discrimination))
+end
+
 @inline function log_resp_vec(ir::ItemResponse{<:TransferItemBank}, θ)
     _logcdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
