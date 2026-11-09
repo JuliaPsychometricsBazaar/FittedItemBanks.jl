@@ -8,7 +8,8 @@
     positive = z >= zero(z)
     small_z = ifelse(positive, -z, z)
     e = @inline exp(small_z)
-    q = @inline log1p(e)
+    # exp is nonnegative; abs exposes that fact to LLVM's domain-check analysis.
+    q = @inline log1p(abs(e))
     small = small_z - q
     large = -q
     SVector(ifelse(positive, small, large), ifelse(positive, large, small))

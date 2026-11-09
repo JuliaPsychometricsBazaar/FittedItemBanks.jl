@@ -25,6 +25,36 @@ using FittedItemBanks, Test, Distributions, ForwardDiff
     end
 end
 
+@testset "vectorizable native log sums" begin
+    for T in (Float32, Float64, BigFloat)
+        values = T[-Inf, -1000, -700, -40, -1, -0., 0., 1, 40, 700, 1000, Inf, NaN]
+        for a in values, b in values
+            actual = FittedItemBanks._log_response_sum(a, b)
+            reference = FittedItemBanks.logaddexp(a, b)
+            @test isnan(reference) ? isnan(actual) :
+                isapprox(actual, reference; rtol=16eps(T), atol=eps(T))
+        end
+    end
+    # Equal finite summands each contribute half the derivative.
+    for x in (-1000., -1., 0., 1., 1000.)
+        @test ForwardDiff.derivative(a -> FittedItemBanks._log_response_sum(a, x), x) ≈ 0.5
+        @test ForwardDiff.derivative(b -> FittedItemBanks._log_response_sum(x, b), x) ≈ 0.5
+    end
+    for g in (0., 0.25, 0.5), s in (0., 0.25, 0.5)
+        ir = ItemResponse(GuessAndSlipItemBank([g], [s],
+            TransferItemBank(Logistic(), [0.], [1.])), 1)
+        evaluate = log_resp_vec(ir)
+        for x in (-700., -40., -1., 0., 1., 40., 700.), k in 1:2
+            p = resp_vec(ir, x)[k]
+            # The existing clamp at log(p)=0 has zero derivative once a
+            # probability rounds to one; compare away from that clamp.
+            (p == 0 || evaluate(x)[k] == 0) && continue
+            reference = ForwardDiff.derivative(t -> resp_vec(ir, t)[k], x) / p
+            @test ForwardDiff.derivative(t -> evaluate(t)[k], x) ≈ reference rtol=1e-12 atol=1e-300
+        end
+    end
+end
+
 @testset "log tails and midpoint derivatives" begin
     ir = ItemResponse(TransferItemBank(Logistic(), [0.], [1.]), 1)
     for x in (-1000.,-700.,-40.,-0.1,-0.,0.,0.1,40.,700.,1000.)

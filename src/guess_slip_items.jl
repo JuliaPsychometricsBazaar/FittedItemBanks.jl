@@ -171,8 +171,22 @@ end
 end
 
 @inline function _log_transform_irf_logs(log_offset, log_scale, inner_logp)
-    logp = logaddexp(log_offset, log_scale + inner_logp)
+    logp = _log_response_sum(log_offset, log_scale + inner_logp)
     return min(logp, zero(logp))
+end
+
+# A stable log sum with the elementary calls exposed to the caller's grid loop.
+# Keep the finite equal-input difference intact for automatic differentiation.
+@inline function _log_response_sum(a, b)
+    a, b = promote(a, b)
+    larger_a = a >= b
+    hi = ifelse(larger_a, a, b)
+    difference = ifelse(larger_a, b - a, a - b)
+    difference = ifelse(isinf(a) & (a == b), zero(difference), difference)
+    e = @inline exp(difference)
+    # Redundant numerically, but lets LLVM eliminate log1p's throwing branch.
+    correction = @inline log1p(abs(e))
+    hi + correction
 end
 
 function log_resp(ir::ItemResponse{<:GuessAndSlipItemBank}, response, θ)
