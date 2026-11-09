@@ -102,7 +102,8 @@ using BSplines
                     for (j, outcome) in enumerate(responses(ir))
                         p = resp(ir, outcome, θ)
                         @test p isa ULogarithmic
-                        @test p == ps[j]
+                        # Shared paired evaluation may round differently from the scalar formula.
+                        @test log(p) ≈ log(ps[j]) rtol=16eps(Float64)
                         @test log(p) == log_resp(inner_ir, outcome, θ)
                         @test log_resp(ir, outcome, θ) == log_resp(inner_ir, outcome, θ)
                     end
