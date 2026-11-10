@@ -469,6 +469,7 @@ function log_resp end
 """
 ```julia
 $(FUNCTIONNAME)(ir::ItemResponse, θ) -> AbstractVector{Float64}
+$(FUNCTIONNAME)(ir::ItemResponse) -> callable
 ```
 
 Return the vector of logarithms of the item response function for the item
@@ -478,6 +479,15 @@ The outcome at each index corresponds with the indices returned by the
 [`responses`](@ref) function. See [`log_resp`](@ref).
 """
 function log_resp_vec end
+
+"""
+    log_resp_vec(ir::ItemResponse)
+
+Create an evaluator for repeated abilities: `evaluate = log_resp_vec(ir)`;
+`evaluate(θ)` returns the same outcome log probabilities as `log_resp_vec(ir, θ)`.
+Recreate it after editing the item bank's parameters.
+"""
+log_resp_vec(ir::ItemResponse) = θ -> log_resp_vec(ir, θ)
 
 function convert_parameter_type end
 

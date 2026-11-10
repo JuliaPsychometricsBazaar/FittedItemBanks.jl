@@ -102,7 +102,8 @@ using BSplines
                     for (j, outcome) in enumerate(responses(ir))
                         p = resp(ir, outcome, θ)
                         @test p isa ULogarithmic
-                        @test p == ps[j]
+                        # Shared paired evaluation may round differently from the scalar formula.
+                        @test log(p) ≈ log(ps[j]) rtol=16eps(Float64)
                         @test log(p) == log_resp(inner_ir, outcome, θ)
                         @test log_resp(ir, outcome, θ) == log_resp(inner_ir, outcome, θ)
                     end
@@ -125,5 +126,15 @@ end
         @test p > 0
         @test log(p) ≈ -1000.0
         @test log(p * p) ≈ -2000.0
+    end
+end
+
+@testset "unsigned log probability comparisons" begin
+    ext = Base.get_extension(FittedItemBanks, :TestExt)
+    for a in (-1.2482736303037976, -1000.)
+        p, q = exp(ULogarithmic, a), exp(ULogarithmic, nextfloat(a))
+        @test ext.probability_isapprox(p,q;rtol=1e-10,atol=0)
+        @test ext.probability_isapprox(q,p;rtol=1e-10,atol=0)
+        @test !ext.probability_isapprox(p,exp(ULogarithmic,a+1);rtol=1e-10,atol=0)
     end
 end

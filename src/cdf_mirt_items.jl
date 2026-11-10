@@ -62,12 +62,8 @@ end
 
 num_response_categories(ir::ItemResponse{<:CdfMirtItemBank}) = 2
 
-function log_resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
-    nθ = norm_abil(ir, θ)
-    return SVector(
-        logccdf(ir.item_bank.distribution, nθ),
-        logcdf(ir.item_bank.distribution, nθ)
-    )
+@inline function log_resp_vec(ir::ItemResponse{<:CdfMirtItemBank}, θ)
+    _logcdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 function log_resp(ir::ItemResponse{<:CdfMirtItemBank}, outcome::Bool, θ)
@@ -314,12 +310,8 @@ end
 
 num_response_categories(ir::ItemResponse{<:SlopeInterceptMirtItemBank}) = 2
 
-function log_resp_vec(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
-    nθ = norm_abil(ir, θ)
-    return SVector(
-        logccdf(ir.item_bank.distribution, nθ),
-        logcdf(ir.item_bank.distribution, nθ)
-    )
+@inline function log_resp_vec(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, θ)
+    _logcdf_response_pair(ir.item_bank.distribution, norm_abil(ir, θ))
 end
 
 function log_resp(ir::ItemResponse{<:SlopeInterceptMirtItemBank}, outcome::Bool, θ)
